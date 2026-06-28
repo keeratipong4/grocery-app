@@ -37,3 +37,9 @@ export interface Member {
   email: string;
   joinedAt: string;
 }
+
+export interface Item {
+  id: number;
+  title: string;
+  createdAt: Date;
+}

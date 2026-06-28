@@ -1,13 +1,16 @@
-'use client'; // form submission updates useMemberStore
+'use client'; // form submission updates useMemberStore and calls auth API
 
 import { useState } from 'react';
 import { useMemberStore } from '@/store/useMemberStore';
 
 export default function MembershipModal() {
   const { isMember, join, member } = useMemberStore();
-  const [email, setEmail]         = useState('');
-  const [password, setPassword]   = useState('');
-  const [success, setSuccess]     = useState(false);
+  const [email,      setEmail]      = useState('');
+  const [password,   setPassword]   = useState('');
+  const [loading,    setLoading]    = useState(false);
+  const [apiError,   setApiError]   = useState('');
+  const [success,    setSuccess]    = useState(false);
+  const [isReturning, setIsReturning] = useState(false);
 
   if (isMember()) {
     return (
@@ -20,11 +23,49 @@ export default function MembershipModal() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email || !password) return;
-    join(email);
-    setSuccess(true);
+    if (!email || !password || loading) return;
+    setLoading(true);
+    setApiError('');
+
+    try {
+      // 1. Register (or login if email exists)
+      const regRes = await fetch('/api/auth/register', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+      });
+
+      if (!regRes.ok) {
+        if (regRes.status === 409) {
+          // Email already exists — attempt login instead
+          const loginRes = await fetch('/api/auth/login', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, password }),
+          });
+          if (!loginRes.ok) {
+            const loginErr = await loginRes.json() as { message?: string };
+            setApiError(loginErr.message ?? 'เข้าสู่ระบบไม่สำเร็จ');
+            return;
+          }
+          setIsReturning(true);
+        } else {
+          const regErr = await regRes.json() as { message?: string };
+          setApiError(regErr.message ?? 'สมัครสมาชิกไม่สำเร็จ');
+          return;
+        }
+      }
+
+      // 2. Sync local Zustand state (join() also activates membership on server)
+      join(email);
+      setSuccess(true);
+    } catch {
+      setApiError('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -38,9 +79,14 @@ export default function MembershipModal() {
       </p>
 
       {success ? (
-        <p className="text-green-300 font-semibold">✓ สมัครสำเร็จ! โค้ดส่วนลดอยู่ในอีเมลของคุณ</p>
+        <p className="text-green-300 font-semibold">
+          {isReturning ? '✓ ยินดีต้อนรับกลับ! สิทธิ์สมาชิก 15% พร้อมใช้งาน' : '✓ สมัครสำเร็จ! โค้ดส่วนลดอยู่ในอีเมลของคุณ'}
+        </p>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          {apiError && (
+            <p className="text-red-300 text-sm bg-red-900/30 px-3 py-2 rounded-md">{apiError}</p>
+          )}
           <input
             type="email"
             placeholder="อีเมล"
@@ -51,17 +97,19 @@ export default function MembershipModal() {
           />
           <input
             type="password"
-            placeholder="รหัสผ่าน"
+            placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)"
             required
+            minLength={8}
             value={password}
             onChange={e => setPassword(e.target.value)}
             className="h-[42px] px-4 rounded-md bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-primary"
           />
           <button
             type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-md transition-colors"
+            disabled={loading}
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-md transition-colors"
           >
-            สมัครสมาชิก
+            {loading ? 'กำลังดำเนินการ…' : 'สมัครสมาชิก'}
           </button>
         </form>
       )}

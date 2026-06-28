@@ -1,12 +1,19 @@
 'use client'; // reads/writes useCartStore, controls drawer visibility
 
+import { useEffect } from 'react';
 import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
 import { useMemberStore } from '@/store/useMemberStore';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, totalPrice } = useCartStore();
-  const discountRate = useMemberStore(s => s.discountRate());
+  const hydrateFromApi = useCartStore(s => s.hydrateFromApi);
+  const discountRate   = useMemberStore(s => s.discountRate());
+
+  // Pull server cart once on mount (e.g. after a page reload post-login)
+  useEffect(() => {
+    hydrateFromApi();
+  }, [hydrateFromApi]);
 
   const subtotal  = totalPrice();
   const discount  = Math.round(subtotal * discountRate / 100);

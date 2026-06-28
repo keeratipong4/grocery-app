@@ -439,6 +439,67 @@
       scrollbar-width: thin;
     }
     .scroll-row .product-card { width: 220px; flex-shrink: 0; }
+
+    /* ─── Dialog ─────────────────────────────────────────────────── */
+    .dialog-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .dialog-backdrop.is-open {
+      opacity: 1; pointer-events: auto;
+    }
+    .dialog {
+      background: var(--color-canvas);
+      border-radius: var(--rounded-banner);
+      box-shadow: var(--shadow-md);
+      width: 100%; max-width: 480px;
+      margin: var(--space-xl);
+      display: flex; flex-direction: column;
+      transform: scale(0.95) translateY(8px);
+      transition: transform 0.2s;
+    }
+    .dialog-backdrop.is-open .dialog {
+      transform: scale(1) translateY(0);
+    }
+    .dialog__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-xl) var(--space-xl) var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .dialog__title {
+      font-size: 20px; font-weight: 700; line-height: 1.3;
+    }
+    .dialog__close {
+      background: none; border: none; cursor: pointer;
+      font-size: 20px; line-height: 1;
+      color: var(--color-text-secondary);
+      padding: var(--space-xs); border-radius: var(--rounded-sm);
+      transition: background 0.15s, color 0.15s;
+    }
+    .dialog__close:hover {
+      background: var(--color-surface); color: var(--color-ink);
+    }
+    .dialog__body {
+      padding: var(--space-xl);
+      font-size: 14px; font-weight: 500; line-height: 1.5;
+      color: var(--color-ink); flex: 1;
+    }
+    .dialog__footer {
+      display: flex; justify-content: flex-end; gap: var(--space-md);
+      padding: var(--space-lg) var(--space-xl) var(--space-xl);
+      border-top: 1px solid var(--color-border);
+    }
+    .dialog-demo-static {
+      position: relative; background: var(--color-canvas);
+      border-radius: var(--rounded-banner);
+      box-shadow: var(--shadow-md);
+      width: 100%; max-width: 480px;
+      border: 1px solid var(--color-border);
+    }
   </style>
 </head>
 <body>
@@ -1143,6 +1204,116 @@
     </div>
   </div>
 </div>
+
+<!-- ─── 15. Dialog ─────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">15 · Dialog</h2>
+
+    <p style="margin-bottom:var(--space-xl);font-size:13px;color:var(--color-text-secondary);max-width:640px">
+      Modal dialog for confirmations, destructive actions, and short-form content.
+      Backdrop is <code style="background:var(--color-surface);padding:1px 5px;border-radius:4px">bg-black/40</code> (same token as CartDrawer).
+      Panel uses <code style="background:var(--color-surface);padding:1px 5px;border-radius:4px">rounded-banner</code> (12px) and <code style="background:var(--color-surface);padding:1px 5px;border-radius:4px">shadow-md</code>.
+      Cancel = amber (browse action) · Confirm = green (purchase/destructive action).
+    </p>
+
+    <!-- Anatomy (static preview) -->
+    <p style="margin-bottom:var(--space-lg);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Anatomy</p>
+    <div class="dialog-demo-static" style="margin-bottom:var(--space-xxl)">
+      <div class="dialog__header">
+        <div class="dialog__title">Remove item from cart?</div>
+        <button class="dialog__close" aria-label="Close">✕</button>
+      </div>
+      <div class="dialog__body">
+        <p>Are you sure you want to remove <strong>Organic Broccoli 500g</strong> from your cart? You can always add it back later.</p>
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--primary" style="padding:8px 20px">Cancel</button>
+        <button class="btn btn--checkout" style="width:auto;padding:8px 20px">Remove Item</button>
+      </div>
+    </div>
+
+    <!-- Variants row -->
+    <p style="margin-bottom:var(--space-lg);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Variants</p>
+    <div style="display:flex;gap:var(--space-xl);flex-wrap:wrap;margin-bottom:var(--space-xxl)">
+
+      <!-- Confirm purchase dialog -->
+      <div style="flex:1;min-width:300px">
+        <div class="dialog-demo-static">
+          <div class="dialog__header">
+            <div class="dialog__title">Confirm Purchase</div>
+            <button class="dialog__close" aria-label="Close">✕</button>
+          </div>
+          <div class="dialog__body" style="padding-bottom:var(--space-md)">
+            <p style="margin-bottom:var(--space-md)">Your order total is <strong style="color:var(--color-cta-green)">฿ 249.05</strong> after member discount.</p>
+            <p style="font-size:12px;color:var(--color-text-secondary)">Estimated delivery: Today 18:00–20:00</p>
+          </div>
+          <div class="dialog__footer">
+            <button class="btn btn--primary" style="padding:8px 20px">Go Back</button>
+            <button class="btn btn--checkout" style="width:auto;padding:8px 20px">Place Order</button>
+          </div>
+        </div>
+        <div class="ds-label" style="margin-top:var(--space-sm)">Confirm purchase</div>
+      </div>
+
+      <!-- Info / informational dialog -->
+      <div style="flex:1;min-width:300px">
+        <div class="dialog-demo-static">
+          <div class="dialog__header">
+            <div class="dialog__title">Membership Benefits</div>
+            <button class="dialog__close" aria-label="Close">✕</button>
+          </div>
+          <div class="dialog__body">
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--space-sm)">
+              <li style="font-size:13px">⭐ 15% off every order</li>
+              <li style="font-size:13px">🚚 Free delivery on orders over ฿ 500</li>
+              <li style="font-size:13px">🎁 Monthly surprise box</li>
+            </ul>
+          </div>
+          <div class="dialog__footer">
+            <button class="btn btn--membership" style="width:auto;padding:8px 20px">Join Now</button>
+          </div>
+        </div>
+        <div class="ds-label" style="margin-top:var(--space-sm)">Info / single CTA</div>
+      </div>
+
+    </div>
+
+    <!-- Live demo trigger -->
+    <p style="margin-bottom:var(--space-lg);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Live Demo</p>
+    <button class="btn btn--primary" onclick="document.getElementById('dialog-live').classList.add('is-open')">
+      Open Dialog →
+    </button>
+  </div>
+</div>
+
+<!-- Live dialog overlay (appended outside sections so z-index stacks correctly) -->
+<div id="dialog-live" class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="dialog-live-title">
+  <div class="dialog">
+    <div class="dialog__header">
+      <div class="dialog__title" id="dialog-live-title">Clear entire cart?</div>
+      <button class="dialog__close" aria-label="Close" onclick="document.getElementById('dialog-live').classList.remove('is-open')">✕</button>
+    </div>
+    <div class="dialog__body">
+      <p>This will remove all <strong>3 items</strong> from your cart. This action cannot be undone.</p>
+    </div>
+    <div class="dialog__footer">
+      <button class="btn btn--primary" style="padding:8px 20px" onclick="document.getElementById('dialog-live').classList.remove('is-open')">Cancel</button>
+      <button class="btn btn--checkout" style="width:auto;padding:8px 20px" onclick="document.getElementById('dialog-live').classList.remove('is-open')">Clear Cart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Close live dialog when clicking the backdrop */
+  document.getElementById('dialog-live').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('is-open');
+  });
+  /* Close on Escape key */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') document.getElementById('dialog-live').classList.remove('is-open');
+  });
+</script>
 
 <!-- ─── Footer of DS doc ──────────────────────────────────────────── -->
 <div style="background:var(--color-canvas-dark);padding:var(--space-xl) var(--space-container-x);text-align:center">

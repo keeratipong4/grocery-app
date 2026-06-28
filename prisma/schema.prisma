@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── Smoke-test model (remove after Layer 3 verification) ──────────────────
+model Item {
+  id        Int      @id @default(autoincrement())
+  title     String
+  createdAt DateTime @default(now())
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+model User {
+  id       String    @id @default(cuid())
+  email    String    @unique
+  password String
+  isMember Boolean   @default(false)
+  joinedAt DateTime  @default(now())
+  sessions Session[]
+  orders   Order[]
+}
+
+model Session {
+  token     String     @id @default(uuid())
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  cartItems CartItem[]
+}
+
+// ── Cart ──────────────────────────────────────────────────────────────────
+model CartItem {
+  id           String  @id @default(cuid())
+  sessionToken String
+  session      Session @relation(fields: [sessionToken], references: [token], onDelete: Cascade)
+  productId    String
+  name         String
+  price        Int
+  qty          Int
+
+  @@unique([sessionToken, productId])
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────
+model Order {
+  id                String           @id @default(cuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id])
+  subtotal          Int
+  discountRate      Int
+  discount          Int
+  grandTotal        Int
+  paymentMethod     String
+  status            String           @default("confirmed")
+  estimatedDelivery DateTime?
+  createdAt         DateTime         @default(now())
+  items             OrderItem[]
+  shippingAddress   ShippingAddress?
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  name      String
+  price     Int
+  qty       Int
+}
+
+model ShippingAddress {
+  id          String @id @default(cuid())
+  orderId     String @unique
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String
+  addressLine String
+  district    String
+  province    String
+  postalCode  String
+}

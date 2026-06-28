@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmart API Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+  <style>
+    :root {
+      --color-primary: #F4B223;
+      --color-cta-green: #16a34a;
+      --color-ink: #222222;
+      --color-border: #E8E8E8;
+      --color-surface: #F8F8F8;
+      --color-canvas-dark: #111827;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #fff;
+      color: var(--color-ink);
+    }
+
+    /* ── Top banner ─────────────────────────────────────── */
+    .ds-header {
+      background: var(--color-canvas-dark);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .ds-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ds-logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 9999px;
+      background: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .ds-logo-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .ds-logo-name span { color: var(--color-primary); }
+    .ds-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      color: #9ca3af;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .ds-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ds-link {
+      font-size: 13px;
+      color: #9ca3af;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .ds-link:hover { color: #fff; }
+    .ds-btn-json {
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--color-primary);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .ds-btn-json:hover { background: #D89A0D; }
+
+    /* ── Stats bar ──────────────────────────────────────── */
+    .ds-stats {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .ds-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .ds-stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1;
+    }
+    .ds-stat-label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .ds-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--color-border);
+    }
+    .ds-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
+    }
+    .ds-tag--green { background: #dcfce7; color: #166534; }
+    .ds-tag--amber { background: #fef9c3; color: #92400e; }
+    .ds-tag--red   { background: #fee2e2; color: #991b1b; }
+
+    /* ── Swagger UI overrides ───────────────────────────── */
+    .swagger-ui .topbar { display: none; }
+
+    .swagger-ui .info {
+      margin: 24px 0 8px;
+    }
+    .swagger-ui .info .title {
+      font-family: 'Inter', system-ui, sans-serif !important;
+      font-size: 26px !important;
+      font-weight: 700 !important;
+      color: var(--color-ink) !important;
+    }
+    .swagger-ui .info .description p,
+    .swagger-ui .info .description li {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .swagger-ui .scheme-container {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 12px 24px;
+      box-shadow: none;
+    }
+
+    /* Tag headings */
+    .swagger-ui .opblock-tag {
+      font-family: 'Inter', system-ui, sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      color: var(--color-ink) !important;
+      border-bottom: 2px solid var(--color-border) !important;
+    }
+
+    /* Method colours */
+    .swagger-ui .opblock.opblock-get    { border-color: #2563eb; background: rgba(37,99,235,0.04); }
+    .swagger-ui .opblock.opblock-post   { border-color: var(--color-cta-green); background: rgba(22,163,74,0.04); }
+    .swagger-ui .opblock.opblock-patch  { border-color: var(--color-primary); background: rgba(244,178,35,0.04); }
+    .swagger-ui .opblock.opblock-delete { border-color: #dc2626; background: rgba(220,38,38,0.04); }
+
+    .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: #2563eb; }
+    .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: var(--color-cta-green); }
+    .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: var(--color-primary); }
+    .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #dc2626; }
+
+    .swagger-ui .btn.execute { background: var(--color-cta-green); border-color: var(--color-cta-green); }
+    .swagger-ui .btn.execute:hover { background: #15803d; }
+
+    .swagger-ui .btn.authorize { border-color: var(--color-primary); color: var(--color-primary); }
+    .swagger-ui .btn.authorize svg { fill: var(--color-primary); }
+
+    .swagger-ui .response-col_status .response-undocumented { display: none; }
+
+    /* Models */
+    .swagger-ui section.models { border: 1px solid var(--color-border); border-radius: 10px; }
+    .swagger-ui section.models h4 {
+      font-family: 'Inter', system-ui, sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+    }
+
+    #swagger-ui { max-width: 1280px; margin: 0 auto; padding: 0 24px 64px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────── -->
+<header class="ds-header">
+  <div class="ds-logo">
+    <div class="ds-logo-mark">F</div>
+    <div>
+      <div class="ds-logo-name"><span>F</span>armart API</div>
+    </div>
+    <span class="ds-badge">OpenAPI 3.0</span>
+  </div>
+  <div class="ds-header-right">
+    <a href="/" class="ds-link">← หน้าแรก</a>
+    <a href="/swagger.json" target="_blank" class="ds-btn-json">swagger.json ↗</a>
+  </div>
+</header>
+
+<!-- ── Stats bar ───────────────────────────────────────── -->
+<div class="ds-stats">
+  <div class="ds-stat">
+    <div class="ds-stat-num">16</div>
+    <div class="ds-stat-label">Endpoints</div>
+  </div>
+  <div class="ds-divider"></div>
+  <div class="ds-stat">
+    <div class="ds-stat-num">12</div>
+    <div class="ds-stat-label">Schemas</div>
+  </div>
+  <div class="ds-divider"></div>
+  <div class="ds-stat">
+    <div class="ds-stat-num">8</div>
+    <div class="ds-stat-label">Tags</div>
+  </div>
+  <div class="ds-divider"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="ds-tag ds-tag--green">● GET · POST</span>
+    <span class="ds-tag ds-tag--amber">● PATCH</span>
+    <span class="ds-tag ds-tag--red">● DELETE</span>
+  </div>
+  <div class="ds-divider"></div>
+  <div style="font-size:13px;color:#888">
+    Auth: <strong style="color:var(--color-ink)">Cookie session</strong>
+    &nbsp;·&nbsp;
+    Price: <strong style="color:var(--color-ink)">THB integer</strong>
+    &nbsp;·&nbsp;
+    Version: <strong style="color:var(--color-ink)">0.1.0</strong>
+  </div>
+</div>
+
+<!-- ── Swagger UI ───────────────────────────────────────── -->
+<div id="swagger-ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-standalone-preset.js"></script>
+<script>
+  SwaggerUIBundle({
+    url: '/swagger.json',
+    dom_id: '#swagger-ui',
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset,
+    ],
+    layout: 'StandaloneLayout',
+    deepLinking: true,
+    displayOperationId: false,
+    defaultModelsExpandDepth: 1,
+    defaultModelExpandDepth: 2,
+    docExpansion: 'list',
+    filter: true,
+    syntaxHighlight: { theme: 'agate' },
+    tryItOutEnabled: true,
+  });
+</script>
+</body>
+</html>

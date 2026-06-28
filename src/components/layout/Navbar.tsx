@@ -1,18 +1,19 @@
 'use client'; // reads cart badge from useCartStore, toggles mobile menu
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
 
 const NAV_LINKS = [
   { label: 'โปรโมชั่น',     href: '#' },
   { label: "ดีลวันนี้ 🔥",   href: '#', highlight: true },
-  { label: 'อาหาร',          href: '#' },
-  { label: 'แช่แข็ง',        href: '#' },
-  { label: 'เครื่องดื่ม',    href: '#' },
-  { label: 'ร้านค้า',        href: '#' },
-  { label: 'บล็อก',          href: '#' },
-  { label: 'หน้าอื่น ▾',     href: '#' },
+  { label: 'ผัก & ผลไม้',   href: '/category/vegetables' },
+  { label: 'เนื้อสัตว์',    href: '/category/meat' },
+  { label: 'แช่แข็ง',        href: '/category/frozen' },
+  { label: 'เครื่องดื่ม',    href: '/category/beverage' },
+  { label: 'นม & ไข่',       href: '/category/dairy' },
+  { label: 'เบเกอรี่',       href: '/category/bakery' },
 ];
 
 export default function Navbar() {
@@ -30,10 +31,10 @@ export default function Navbar() {
         <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center gap-6">
 
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">F</span>
             <span className="text-xl font-bold text-gray-900 tracking-tight">farmart</span>
-          </a>
+          </Link>
 
           {/* Search */}
           <form className="flex-1 flex items-center border border-border rounded-md overflow-hidden h-[42px] max-w-[600px] focus-within:border-primary transition-colors" onSubmit={e => e.preventDefault()}>
@@ -109,12 +110,12 @@ export default function Navbar() {
           <ul className="hidden md:flex items-center gap-1 flex-1 overflow-hidden">
             {NAV_LINKS.map(link => (
               <li key={link.label}>
-                <a
+                <Link
                   href={link.href}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-colors hover:text-primary hover:bg-surface ${link.highlight ? 'text-danger' : 'text-gray-800'}`}
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -137,12 +138,13 @@ export default function Navbar() {
           <ul className="md:hidden absolute left-0 right-0 bg-white border-b border-border px-6 py-3 flex flex-col gap-1 shadow-md z-20">
             {NAV_LINKS.map(link => (
               <li key={link.label}>
-                <a
+                <Link
                   href={link.href}
                   className={`block px-3 py-2 text-sm font-medium rounded-md transition-colors hover:text-primary hover:bg-surface ${link.highlight ? 'text-danger' : 'text-gray-800'}`}
+                  onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

@@ -1,0 +1,864 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Farmart API",
+    "description": "REST API contract for Farmart — Thai online grocery store.\n\n## Color Rules (mirrored from design system)\n- **Amber** (`#F4B223`) browse/navigation actions\n- **Green-600** (`#16a34a`) purchase actions: add-to-cart, checkout, membership\n\n## Auth\nAll cart and checkout endpoints require a session cookie (`farmart-session`). Register or login first to obtain one.\n\n## Price\nAll `price` fields are in **Thai Baht (THB)**, stored as integers (สตางค์-free). Always render via `formatPrice()` on the client.",
+    "version": "0.1.0",
+    "contact": {
+      "name": "Farmart Dev",
+      "email": "dev@farmart.th"
+    }
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local dev" },
+    { "url": "https://farmart.vercel.app", "description": "Production" }
+  ],
+  "tags": [
+    { "name": "health",     "description": "Server health & version" },
+    { "name": "catalog",    "description": "Products and categories" },
+    { "name": "search",     "description": "Full-text search" },
+    { "name": "cart",       "description": "Shopping cart (session-scoped)" },
+    { "name": "auth",       "description": "Register / login / logout" },
+    { "name": "membership", "description": "Member status and discount" },
+    { "name": "checkout",   "description": "Place orders" },
+    { "name": "orders",     "description": "Order history and tracking" }
+  ],
+  "paths": {
+    "/api/hello": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health check",
+        "description": "Returns server status. Useful for uptime monitoring and smoke tests.",
+        "operationId": "getHello",
+        "responses": {
+          "200": {
+            "description": "Server is up",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HelloResponse" },
+                "example": { "message": "Hello World" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": ["catalog"],
+        "summary": "List all categories",
+        "operationId": "listCategories",
+        "responses": {
+          "200": {
+            "description": "Array of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Category" }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    { "id": "1", "name": "ผัก", "slug": "vegetables", "icon": "🥦", "color": "#E8F5E9" },
+                    { "id": "2", "name": "ผลไม้", "slug": "fruits",     "icon": "🍎", "color": "#FFF3E0" }
+                  ]
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": ["catalog"],
+        "summary": "List products",
+        "description": "Returns a paginated list of products. Filter by category slug or search query. Sort by price, rating, or newest.",
+        "operationId": "listProducts",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Category slug (e.g. `vegetables`, `fruits`)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Full-text search query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort field",
+            "schema": {
+              "type": "string",
+              "enum": ["price_asc", "price_desc", "rating_desc", "newest", "discount_desc"],
+              "default": "newest"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+          },
+          {
+            "name": "isNew",
+            "in": "query",
+            "description": "Filter new arrivals only",
+            "schema": { "type": "boolean" }
+          },
+          {
+            "name": "hasDiscount",
+            "in": "query",
+            "description": "Filter products with discount > 0",
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated product list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProductListResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "tags": ["catalog"],
+        "summary": "Get product by ID",
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "data": { "$ref": "#/components/schemas/Product" } }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "tags": ["search"],
+        "summary": "Search products",
+        "description": "Full-text search across product name and category. Delegates to `/api/products?q=` internally — provided as a convenience alias.",
+        "operationId": "searchProducts",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search term (min 2 characters)",
+            "schema": { "type": "string", "minLength": 2 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching products",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProductListResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/cart": {
+      "get": {
+        "tags": ["cart"],
+        "summary": "Get cart",
+        "description": "Returns the caller's current cart including computed subtotal, member discount, and grand total.",
+        "operationId": "getCart",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Cart summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CartSummary" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "tags": ["cart"],
+        "summary": "Clear cart",
+        "description": "Removes all items from the cart.",
+        "operationId": "clearCart",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Cart cleared",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/cart/items": {
+      "post": {
+        "tags": ["cart"],
+        "summary": "Add item to cart",
+        "description": "Adds a product to the cart. If the product already exists, increments qty by the requested amount.",
+        "operationId": "addCartItem",
+        "security": [{ "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddCartItemRequest" },
+              "example": { "productId": "1", "qty": 2 }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated cart",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CartSummary" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/cart/items/{productId}": {
+      "patch": {
+        "tags": ["cart"],
+        "summary": "Update item quantity",
+        "description": "Sets the qty for a specific product. If qty < 1 the item is removed.",
+        "operationId": "updateCartItem",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateCartItemRequest" },
+              "example": { "qty": 3 }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated cart",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CartSummary" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "tags": ["cart"],
+        "summary": "Remove item from cart",
+        "operationId": "removeCartItem",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cart",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CartSummary" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Register new account",
+        "operationId": "register",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthRequest" },
+              "example": { "email": "user@example.com", "password": "s3cur3pass!" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Session cookie `farmart-session=<token>; HttpOnly; SameSite=Lax`",
+                "schema": { "type": "string" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "code": "DUPLICATE_EMAIL", "message": "อีเมลนี้ถูกใช้งานแล้ว" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Login",
+        "operationId": "login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Session cookie",
+                "schema": { "type": "string" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "code": "INVALID_CREDENTIALS", "message": "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Logout",
+        "operationId": "logout",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Logged out — session cookie cleared",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Get current user",
+        "operationId": "getMe",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Current member profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "data": { "$ref": "#/components/schemas/Member" } }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/membership": {
+      "get": {
+        "tags": ["membership"],
+        "summary": "Get membership status",
+        "description": "Returns whether the current session user is a member and their discount rate.",
+        "operationId": "getMembership",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Membership info",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MembershipStatus" },
+                "example": { "isMember": true, "discountRate": 15, "joinedAt": "2026-01-15T08:00:00.000Z" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/membership/join": {
+      "post": {
+        "tags": ["membership"],
+        "summary": "Join membership",
+        "description": "Activates member status for the current user. Grants 15% discount on all orders.",
+        "operationId": "joinMembership",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Membership activated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MembershipStatus" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "409": {
+            "description": "Already a member",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "code": "ALREADY_MEMBER", "message": "คุณเป็นสมาชิกอยู่แล้ว" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/checkout": {
+      "post": {
+        "tags": ["checkout"],
+        "summary": "Place order",
+        "description": "Creates a new order from the current cart. Applies member discount if applicable. Clears the cart on success.",
+        "operationId": "checkout",
+        "security": [{ "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckoutRequest" },
+              "example": {
+                "shippingAddress": {
+                  "name": "สมชาย ใจดี",
+                  "phone": "0812345678",
+                  "addressLine": "99/1 ถ.สุขุมวิท",
+                  "district": "วัฒนา",
+                  "province": "กรุงเทพมหานคร",
+                  "postalCode": "10110"
+                },
+                "paymentMethod": "promptpay"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order placed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "data": { "$ref": "#/components/schemas/Order" } }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cart is empty or validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "code": "EMPTY_CART", "message": "ตะกร้าสินค้าว่างเปล่า" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": {
+            "description": "Out-of-stock item",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "code": "OUT_OF_STOCK", "message": "สินค้า 'บร็อคโคลี่ออร์แกนิค' หมดสต็อก" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/orders/{id}": {
+      "get": {
+        "tags": ["orders"],
+        "summary": "Get order by ID",
+        "operationId": "getOrder",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "data": { "$ref": "#/components/schemas/Order" } }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": {
+            "description": "Order belongs to another user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "code": "FORBIDDEN", "message": "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "farmart-session",
+        "description": "HttpOnly session cookie issued by `/api/auth/login` or `/api/auth/register`"
+      }
+    },
+    "schemas": {
+      "HelloResponse": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": { "type": "string", "example": "Hello World" }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "required": ["id", "name", "category", "price", "discount", "image", "rating", "reviewCount", "isNew"],
+        "properties": {
+          "id":          { "type": "string",  "example": "1" },
+          "name":        { "type": "string",  "example": "บร็อคโคลี่ออร์แกนิค" },
+          "category":    { "type": "string",  "example": "ผัก" },
+          "price":       { "type": "integer", "description": "Price in THB", "example": 99 },
+          "discount":    { "type": "integer", "description": "Discount percentage 0–100", "minimum": 0, "maximum": 100, "example": 20 },
+          "image":       { "type": "string",  "format": "uri", "example": "https://images.unsplash.com/photo-example" },
+          "rating":      { "type": "number",  "format": "float", "minimum": 0, "maximum": 5, "example": 4.5 },
+          "reviewCount": { "type": "integer", "minimum": 0, "example": 128 },
+          "isNew":       { "type": "boolean", "example": false }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "required": ["id", "name", "slug", "icon", "color"],
+        "properties": {
+          "id":    { "type": "string", "example": "1" },
+          "name":  { "type": "string", "example": "ผัก" },
+          "slug":  { "type": "string", "example": "vegetables" },
+          "icon":  { "type": "string", "description": "Emoji icon", "example": "🥦" },
+          "color": { "type": "string", "description": "Pastel background hex for the icon circle", "example": "#E8F5E9" }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "required": ["productId", "name", "price", "qty"],
+        "properties": {
+          "productId": { "type": "string",  "example": "1" },
+          "name":      { "type": "string",  "example": "บร็อคโคลี่ออร์แกนิค" },
+          "price":     { "type": "integer", "description": "Discounted unit price in THB", "example": 79 },
+          "qty":       { "type": "integer", "minimum": 1, "example": 2 }
+        }
+      },
+      "CartSummary": {
+        "type": "object",
+        "required": ["items", "subtotal", "discountRate", "discount", "grandTotal"],
+        "properties": {
+          "items":        { "type": "array", "items": { "$ref": "#/components/schemas/CartItem" } },
+          "subtotal":     { "type": "integer", "description": "Sum of item prices × qty, in THB", "example": 293 },
+          "discountRate": { "type": "integer", "description": "Member discount % (0 or 15)", "example": 15 },
+          "discount":     { "type": "integer", "description": "Baht amount deducted", "example": 44 },
+          "grandTotal":   { "type": "integer", "description": "subtotal − discount", "example": 249 }
+        }
+      },
+      "Member": {
+        "type": "object",
+        "required": ["email", "joinedAt"],
+        "properties": {
+          "email":    { "type": "string", "format": "email", "example": "user@example.com" },
+          "joinedAt": { "type": "string", "format": "date-time", "example": "2026-01-15T08:00:00.000Z" }
+        }
+      },
+      "MembershipStatus": {
+        "type": "object",
+        "required": ["isMember", "discountRate"],
+        "properties": {
+          "isMember":     { "type": "boolean", "example": true },
+          "discountRate": { "type": "integer", "description": "0 when not a member, 15 when member", "example": 15 },
+          "joinedAt":     { "type": "string",  "format": "date-time", "nullable": true, "example": "2026-01-15T08:00:00.000Z" }
+        }
+      },
+      "ShippingAddress": {
+        "type": "object",
+        "required": ["name", "phone", "addressLine", "district", "province", "postalCode"],
+        "properties": {
+          "name":        { "type": "string", "example": "สมชาย ใจดี" },
+          "phone":       { "type": "string", "pattern": "^0[0-9]{9}$", "example": "0812345678" },
+          "addressLine": { "type": "string", "example": "99/1 ถ.สุขุมวิท" },
+          "district":    { "type": "string", "example": "วัฒนา" },
+          "province":    { "type": "string", "example": "กรุงเทพมหานคร" },
+          "postalCode":  { "type": "string", "pattern": "^[0-9]{5}$", "example": "10110" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "required": ["id", "items", "subtotal", "discountRate", "discount", "grandTotal", "status", "createdAt"],
+        "properties": {
+          "id":              { "type": "string", "example": "ord_abc123" },
+          "items":           { "type": "array", "items": { "$ref": "#/components/schemas/CartItem" } },
+          "subtotal":        { "type": "integer", "example": 293 },
+          "discountRate":    { "type": "integer", "example": 15 },
+          "discount":        { "type": "integer", "example": 44 },
+          "grandTotal":      { "type": "integer", "example": 249 },
+          "shippingAddress": { "$ref": "#/components/schemas/ShippingAddress" },
+          "paymentMethod":   {
+            "type": "string",
+            "enum": ["promptpay", "credit_card", "cash_on_delivery"],
+            "example": "promptpay"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "confirmed", "preparing", "out_for_delivery", "delivered", "cancelled"],
+            "example": "confirmed"
+          },
+          "estimatedDelivery": { "type": "string", "format": "date-time", "nullable": true, "example": "2026-06-28T18:00:00.000Z" },
+          "createdAt":         { "type": "string", "format": "date-time", "example": "2026-06-28T10:30:00.000Z" }
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "required": ["data", "meta"],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Product" }
+          },
+          "meta": {
+            "type": "object",
+            "required": ["total", "page", "limit", "totalPages"],
+            "properties": {
+              "total":      { "type": "integer", "example": 20 },
+              "page":       { "type": "integer", "example": 1 },
+              "limit":      { "type": "integer", "example": 20 },
+              "totalPages": { "type": "integer", "example": 1 }
+            }
+          }
+        }
+      },
+      "AuthRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email":    { "type": "string", "format": "email", "example": "user@example.com" },
+          "password": { "type": "string", "minLength": 8, "example": "s3cur3pass!" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": { "$ref": "#/components/schemas/Member" }
+        }
+      },
+      "AddCartItemRequest": {
+        "type": "object",
+        "required": ["productId"],
+        "properties": {
+          "productId": { "type": "string", "example": "1" },
+          "qty":       { "type": "integer", "minimum": 1, "default": 1, "example": 2 }
+        }
+      },
+      "UpdateCartItemRequest": {
+        "type": "object",
+        "required": ["qty"],
+        "properties": {
+          "qty": { "type": "integer", "minimum": 0, "description": "Set to 0 to remove the item", "example": 3 }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "required": ["shippingAddress", "paymentMethod"],
+        "properties": {
+          "shippingAddress": { "$ref": "#/components/schemas/ShippingAddress" },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["promptpay", "credit_card", "cash_on_delivery"],
+            "example": "promptpay"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": {
+          "success": { "type": "boolean", "example": true }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code":    { "type": "string", "example": "NOT_FOUND" },
+          "message": { "type": "string", "example": "ไม่พบสินค้าที่ร้องขอ" }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request parameters or body",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+            "example": { "code": "VALIDATION_ERROR", "message": "ข้อมูลไม่ถูกต้อง" }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or expired session",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+            "example": { "code": "UNAUTHORIZED", "message": "กรุณาเข้าสู่ระบบก่อน" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+            "example": { "code": "NOT_FOUND", "message": "ไม่พบข้อมูลที่ร้องขอ" }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Unexpected server error",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+            "example": { "code": "INTERNAL_ERROR", "message": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง" }
+          }
+        }
+      }
+    }
+  }
+}
