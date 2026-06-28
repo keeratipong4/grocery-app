@@ -43,8 +43,8 @@ export default function HomePage() {
           <SectionHeader title="สินค้าราคาพิเศษวันนี้" href="#" />
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 items-start">
             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5">
-              {topSaverProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
+              {topSaverProducts.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
               ))}
             </div>
             <MembershipModal />

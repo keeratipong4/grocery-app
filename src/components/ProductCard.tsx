@@ -8,9 +8,10 @@ import DiscountBadge from './DiscountBadge';
 
 interface Props {
   product: Product;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, priority = false }: Props) {
   const { addItem, openCart } = useCartStore();
   const finalPrice = calcDiscountedPrice(product.price, product.discount);
 
@@ -27,6 +28,7 @@ export default function ProductCard({ product }: Props) {
           alt={product.name}
           fill
           sizes="220px"
+          priority={priority}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <DiscountBadge discount={product.discount} />

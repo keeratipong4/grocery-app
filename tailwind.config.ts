@@ -16,8 +16,12 @@ const config: Config = {
         surface:          '#F8F8F8',
         muted:            '#FAFAFA',
         'text-secondary': '#666666',
+        ink:              '#222222',
+        canvas:           '#ffffff',
+        'canvas-dark':    '#111827',
       },
       borderRadius: {
+        sm:     '6px',
         card:   '10px',
         banner: '12px',
       },

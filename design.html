@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmart Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── CSS Custom Properties ─────────────────────────────────── */
+    :root {
+      --color-primary:        #F4B223;
+      --color-primary-hover:  #D89A0D;
+      --color-cta-green:      #16a34a;
+      --color-cta-green-hover:#15803d;
+      --color-success:        #3BAE5A;
+      --color-danger:         #E64C3C;
+      --color-border:         #E8E8E8;
+      --color-surface:        #F8F8F8;
+      --color-muted:          #FAFAFA;
+      --color-text-secondary: #666666;
+      --color-ink:            #222222;
+      --color-canvas:         #ffffff;
+      --color-canvas-dark:    #111827;
+
+      --rounded-sm:    6px;
+      --rounded-card:  10px;
+      --rounded-banner:12px;
+      --rounded-full:  9999px;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --space-xxl:32px;
+      --space-section:64px;
+      --space-container-x:24px;
+
+      --shadow-card: 0 2px 8px rgba(0,0,0,.08);
+      --shadow-md:   0 8px 24px rgba(0,0,0,.12);
+    }
+
+    /* ─── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--color-canvas);
+      color: var(--color-ink);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── Layout helpers ─────────────────────────────────────────── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-container-x); }
+    .section { padding: var(--space-section) 0; }
+    .section--muted { background: var(--color-muted); }
+    .section--surface { background: var(--color-surface); }
+
+    h1.ds-title {
+      font-size: 36px; font-weight: 700; line-height: 1.15;
+      border-bottom: 3px solid var(--color-primary);
+      padding-bottom: var(--space-sm);
+      margin-bottom: var(--space-xl);
+    }
+    h2.ds-section-heading {
+      font-size: 20px; font-weight: 700; line-height: 1.3;
+      margin-bottom: var(--space-xl);
+      display: flex; align-items: center; gap: var(--space-sm);
+    }
+    h2.ds-section-heading::after {
+      content: ''; flex: 1; height: 1px; background: var(--color-border);
+    }
+    .ds-label {
+      font-size: 11px; font-weight: 400; line-height: 1.3;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-sm);
+    }
+
+    /* ─── Swatch grid ─────────────────────────────────────────────── */
+    .swatch-grid { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+    .swatch {
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);
+    }
+    .swatch__box {
+      width: 80px; height: 80px; border-radius: var(--rounded-card);
+      border: 1px solid var(--color-border);
+    }
+    .swatch__name { font-size: 11px; font-weight: 600; text-align: center; }
+    .swatch__hex  { font-size: 10px; color: var(--color-text-secondary); }
+
+    /* ─── Type specimens ─────────────────────────────────────────── */
+    .type-grid { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .type-row {
+      display: grid; grid-template-columns: 180px 1fr;
+      align-items: baseline; gap: var(--space-xl);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .type-meta { font-size: 11px; color: var(--color-text-secondary); }
+    .type-meta strong { display: block; color: var(--color-ink); font-size: 12px; }
+
+    /* ─── Spacing visual ─────────────────────────────────────────── */
+    .space-grid { display: flex; align-items: flex-end; gap: var(--space-xl); flex-wrap: wrap; }
+    .space-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); }
+    .space-bar { background: var(--color-primary); border-radius: var(--rounded-sm); width: 40px; }
+
+    /* ─── Radius visual ──────────────────────────────────────────── */
+    .radius-grid { display: flex; gap: var(--space-xl); flex-wrap: wrap; }
+    .radius-box {
+      width: 80px; height: 80px; background: var(--color-surface);
+      border: 2px solid var(--color-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; text-align: center;
+    }
+
+    /* ─── Shadow visual ──────────────────────────────────────────── */
+    .shadow-grid { display: flex; gap: var(--space-xl); flex-wrap: wrap; }
+    .shadow-box {
+      width: 120px; height: 80px; background: var(--color-canvas);
+      border-radius: var(--rounded-card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 500;
+    }
+
+    /* ─── Buttons ────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px; font-weight: 600; line-height: 1;
+      cursor: pointer; border: none;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn--primary {
+      background: var(--color-primary); color: var(--color-canvas);
+      border-radius: var(--rounded-sm); padding: 8px 16px;
+    }
+    .btn--primary:hover { background: var(--color-primary-hover); }
+    .btn--add-to-cart {
+      background: var(--color-cta-green); color: var(--color-canvas);
+      border-radius: var(--rounded-sm); padding: 6px 16px; width: 100%;
+    }
+    .btn--add-to-cart:hover { background: var(--color-cta-green-hover); }
+    .btn--checkout {
+      background: var(--color-cta-green); color: var(--color-canvas);
+      border-radius: var(--rounded-sm); padding: 12px 24px; width: 100%;
+    }
+    .btn--checkout:hover { background: var(--color-cta-green-hover); }
+    .btn--membership {
+      background: var(--color-cta-green); color: var(--color-canvas);
+      border-radius: var(--rounded-sm); padding: 10px 24px;
+    }
+    .btn--membership:hover { background: var(--color-cta-green-hover); }
+    .btn-row { display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap; }
+
+    /* ─── Badges ─────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 12px; font-weight: 700; line-height: 1.4;
+      border-radius: var(--rounded-full); padding: 2px 8px;
+    }
+    .badge--discount { background: var(--color-danger); color: var(--color-canvas); }
+    .badge--new      { background: var(--color-success); color: var(--color-canvas); }
+    .badge--cart     {
+      background: var(--color-danger); color: var(--color-canvas);
+      font-size: 11px; width: 16px; height: 16px; padding: 0;
+      justify-content: center;
+    }
+    .badge--eyebrow  { background: var(--color-primary); color: var(--color-canvas); padding: 4px 12px; }
+    .badge-row { display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap; }
+
+    /* ─── Cards ──────────────────────────────────────────────────── */
+    .card-grid {
+      display: grid; gap: var(--space-xl);
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    /* Product Card */
+    .product-card {
+      background: var(--color-canvas);
+      border: 1px solid var(--color-border);
+      border-radius: var(--rounded-card);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .product-card__img {
+      aspect-ratio: 4/3; background: var(--color-surface);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px;
+    }
+    .product-card__badge { position: absolute; top: 8px; left: 8px; }
+    .product-card__body { padding: var(--space-md); }
+    .product-card__cat {
+      font-size: 11px; font-weight: 400; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--color-text-secondary);
+      margin-bottom: var(--space-xs);
+    }
+    .product-card__name {
+      font-size: 14px; font-weight: 500; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: var(--space-sm);
+    }
+    .product-card__price-row { display: flex; align-items: baseline; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+    .product-card__price {
+      font-size: 16px; font-weight: 700; color: var(--color-cta-green);
+    }
+    .product-card__price-orig {
+      font-size: 12px; font-weight: 400; color: var(--color-text-secondary);
+      text-decoration: line-through;
+    }
+    .product-card__stars { font-size: 12px; color: var(--color-primary); margin-bottom: var(--space-sm); }
+
+    /* Category Card */
+    .category-card {
+      background: var(--color-canvas);
+      border: 1px solid var(--color-border);
+      border-radius: var(--rounded-banner);
+      padding: var(--space-lg);
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-sm);
+      min-height: 120px; justify-content: center;
+      cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .category-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-2px);
+    }
+    .category-card__icon {
+      width: 56px; height: 56px; border-radius: var(--rounded-full);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .category-card__name { font-size: 14px; font-weight: 500; }
+
+    /* Brand Card */
+    .brand-card {
+      background: var(--color-canvas);
+      border: 1px solid var(--color-border);
+      border-radius: var(--rounded-card);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      cursor: pointer; transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .brand-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .brand-card__img {
+      aspect-ratio: 4/3;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 40px; gap: var(--space-sm);
+    }
+    .brand-card__brand-name {
+      font-size: 14px; font-weight: 700; color: white; letter-spacing: 0.02em;
+    }
+    .brand-card__body { padding: var(--space-lg); }
+    .brand-card__title { font-size: 16px; font-weight: 700; margin-bottom: var(--space-xs); }
+    .brand-card__sub { font-size: 12px; color: var(--color-text-secondary); }
+
+    /* ─── Navbar preview ─────────────────────────────────────────── */
+    .navbar-demo {
+      border: 1px solid var(--color-border);
+      border-radius: var(--rounded-banner);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+    .nav-topbar {
+      background: var(--color-canvas);
+      border-bottom: 1px solid var(--color-border);
+      height: 80px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--space-xl); gap: var(--space-lg);
+    }
+    .nav-logo {
+      width: 40px; height: 40px; border-radius: var(--rounded-full);
+      background: var(--color-primary);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 16px; flex-shrink: 0;
+    }
+    .nav-search {
+      flex: 1; max-width: 600px;
+      display: flex; align-items: center;
+      border: 1px solid var(--color-border); border-radius: var(--rounded-sm);
+      overflow: hidden; height: 40px;
+    }
+    .nav-search input {
+      flex: 1; border: none; outline: none; padding: 0 var(--space-lg);
+      font-family: inherit; font-size: 14px; font-weight: 500;
+    }
+    .nav-search .btn--primary {
+      height: 100%; border-radius: 0; padding: 0 var(--space-lg);
+    }
+    .nav-icons { display: flex; align-items: center; gap: var(--space-md); }
+    .nav-icon-btn {
+      position: relative; background: none; border: none; cursor: pointer;
+      font-size: 20px; padding: var(--space-sm);
+    }
+    .nav-icon-btn .badge--cart { position: absolute; top: 2px; right: 2px; }
+
+    .nav-row-bar {
+      background: var(--color-canvas); height: 52px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; padding: 0 var(--space-xl); gap: var(--space-xl);
+    }
+    .nav-link {
+      font-size: 14px; font-weight: 500; line-height: 1; color: var(--color-ink);
+      white-space: nowrap; cursor: pointer;
+    }
+    .nav-link--danger { color: var(--color-danger); }
+
+    /* ─── Hero Banner preview ────────────────────────────────────── */
+    .hero-grid {
+      display: grid; grid-template-columns: 70fr 30fr; gap: var(--space-lg);
+    }
+    .hero-main {
+      background: linear-gradient(to bottom right, #dcfce7, #bbf7d0, #86efac);
+      border-radius: var(--rounded-banner);
+      padding: 48px 40px;
+      position: relative; overflow: hidden; min-height: 220px;
+    }
+    .hero-main__emoji {
+      position: absolute; right: 40px; bottom: 0;
+      font-size: 160px; opacity: 0.2; line-height: 1;
+    }
+    .hero-main__eyebrow { margin-bottom: var(--space-sm); }
+    .hero-main h1 {
+      font-size: 36px; font-weight: 700; line-height: 1.15;
+      margin-bottom: var(--space-lg); max-width: 320px;
+    }
+    .hero-promos { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .hero-promo {
+      background: linear-gradient(to bottom right, #fef9c3, #fde68a);
+      border-radius: var(--rounded-banner); padding: var(--space-xl); flex: 1;
+    }
+    .hero-promo h3 { font-size: 16px; font-weight: 700; margin-bottom: var(--space-xs); }
+    .hero-promo p { font-size: 12px; }
+
+    /* ─── Membership Panel ───────────────────────────────────────── */
+    .membership-panel {
+      background: linear-gradient(to bottom, #14532d, #166534);
+      border-radius: var(--rounded-banner);
+      padding: 28px;
+      color: white;
+    }
+    .membership-panel h3 { font-size: 20px; font-weight: 700; margin: var(--space-sm) 0; }
+    .membership-panel p  { font-size: 14px; opacity: 0.85; margin-bottom: var(--space-lg); }
+    .membership-input {
+      width: 100%; height: 42px;
+      background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.20);
+      border-radius: var(--rounded-sm); padding: 0 var(--space-lg);
+      color: white; font-family: inherit; font-size: 14px; font-weight: 500;
+      outline: none; margin-bottom: var(--space-sm);
+    }
+    .membership-input::placeholder { color: rgba(255,255,255,0.5); }
+    .membership-input:focus { border-color: var(--color-primary); }
+    .membership-fine { font-size: 11px; opacity: 0.6; margin-top: var(--space-sm); }
+
+    /* ─── Cart Drawer preview ────────────────────────────────────── */
+    .cart-drawer-demo {
+      width: 380px; background: var(--color-canvas);
+      border: 1px solid var(--color-border); border-radius: var(--rounded-banner);
+      padding: 20px; box-shadow: var(--shadow-md);
+    }
+    .cart-drawer-demo h3 { font-size: 16px; font-weight: 700; margin-bottom: var(--space-lg); }
+    .cart-item {
+      display: flex; gap: var(--space-md); align-items: center;
+      padding: var(--space-md) 0; border-bottom: 1px solid var(--color-border);
+    }
+    .cart-item__img {
+      width: 56px; height: 56px; border-radius: var(--rounded-banner);
+      background: var(--color-surface); font-size: 28px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cart-item__name { font-size: 14px; font-weight: 500; flex: 1; }
+    .cart-item__price { font-size: 16px; font-weight: 700; }
+    .cart-qty {
+      display: flex; align-items: center; gap: var(--space-xs);
+      margin-top: var(--space-xs);
+    }
+    .cart-qty button {
+      width: 24px; height: 24px; border-radius: var(--rounded-sm);
+      border: 1px solid var(--color-border); background: var(--color-surface);
+      cursor: pointer; font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cart-qty span { font-size: 14px; font-weight: 500; min-width: 20px; text-align: center; }
+    .cart-total { padding: var(--space-lg) 0; }
+    .cart-total__row { display: flex; justify-content: space-between; margin-bottom: var(--space-sm); }
+    .cart-total__discount { color: var(--color-success); }
+    .cart-total__grand { font-size: 20px; font-weight: 700; }
+
+    /* ─── Footer preview ─────────────────────────────────────────── */
+    .footer-demo {
+      background: var(--color-canvas-dark); color: #d1d5db;
+      border-radius: var(--rounded-banner);
+      padding: 40px 24px 24px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-xxl);
+      margin-bottom: var(--space-xxl);
+    }
+    .footer-col h4 { color: white; font-size: 14px; font-weight: 600; margin-bottom: var(--space-lg); }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: var(--space-sm); }
+    .footer-col ul li a { font-size: 12px; color: #9ca3af; }
+    .footer-col ul li a:hover { color: white; }
+    .footer-logo { font-size: 20px; font-weight: 700; color: white; margin-bottom: var(--space-sm); }
+    .footer-logo span { color: var(--color-primary); }
+    .footer-bar {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: var(--space-lg);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-bar p { font-size: 12px; }
+    .payment-chips { display: flex; gap: var(--space-sm); }
+    .payment-chip {
+      background: rgba(255,255,255,0.1); color: #d1d5db;
+      font-size: 10px; font-weight: 700;
+      padding: 4px 8px; border-radius: var(--rounded-sm);
+    }
+
+    /* ─── Elevation showcase ─────────────────────────────────────── */
+    .elevation-row { display: flex; gap: var(--space-xxl); flex-wrap: wrap; }
+    .elevation-card {
+      width: 140px; height: 100px; border-radius: var(--rounded-card);
+      background: var(--color-canvas);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: var(--space-xs); border: 1px solid var(--color-border);
+    }
+    .elevation-card p { font-size: 12px; font-weight: 600; }
+    .elevation-card span { font-size: 10px; color: var(--color-text-secondary); text-align: center; }
+
+    /* ─── Scroll row demo ────────────────────────────────────────── */
+    .scroll-row {
+      display: flex; gap: var(--space-lg); overflow-x: auto;
+      padding-bottom: var(--space-sm);
+      scrollbar-width: thin;
+    }
+    .scroll-row .product-card { width: 220px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ─── Page Header ──────────────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h1 class="ds-title">🛒 Farmart Design System <small style="font-size:14px;font-weight:500;color:var(--color-text-secondary);">alpha</small></h1>
+    <p style="color:var(--color-text-secondary);font-size:14px;max-width:640px;">
+      A light-first fresh-market e-commerce design language built for a Thai online grocery store.
+      Amber primary on white canvas · Green CTA purchase system · Mobile-first.
+    </p>
+  </div>
+</div>
+
+<!-- ─── 1. Colors ───────────────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">1 · Colors</h2>
+
+    <p style="margin-bottom:var(--space-lg);font-size:13px;color:var(--color-text-secondary);">
+      Two distinct action colors: <strong style="color:var(--color-primary)">Amber</strong> for navigation/browse,
+      <strong style="color:var(--color-cta-green)">Green</strong> for all purchase CTAs. Never swap them.
+    </p>
+
+    <p style="margin-bottom:var(--space-md);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary);">Primary & CTA</p>
+    <div class="swatch-grid" style="margin-bottom:var(--space-xxl)">
+      <div class="swatch">
+        <div class="swatch__box" style="background:#F4B223"></div>
+        <div class="swatch__name">Primary</div>
+        <div class="swatch__hex">#F4B223</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#D89A0D"></div>
+        <div class="swatch__name">Primary Hover</div>
+        <div class="swatch__hex">#D89A0D</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#16a34a"></div>
+        <div class="swatch__name">CTA Green</div>
+        <div class="swatch__hex">#16a34a</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#15803d"></div>
+        <div class="swatch__name">CTA Green Hover</div>
+        <div class="swatch__hex">#15803d</div>
+      </div>
+    </div>
+
+    <p style="margin-bottom:var(--space-md);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary);">Status</p>
+    <div class="swatch-grid" style="margin-bottom:var(--space-xxl)">
+      <div class="swatch">
+        <div class="swatch__box" style="background:#3BAE5A"></div>
+        <div class="swatch__name">Success</div>
+        <div class="swatch__hex">#3BAE5A</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#E64C3C"></div>
+        <div class="swatch__name">Danger</div>
+        <div class="swatch__hex">#E64C3C</div>
+      </div>
+    </div>
+
+    <p style="margin-bottom:var(--space-md);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary);">Surface & Structure</p>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch__box" style="background:#ffffff;"></div>
+        <div class="swatch__name">Canvas</div>
+        <div class="swatch__hex">#ffffff</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#F8F8F8"></div>
+        <div class="swatch__name">Surface</div>
+        <div class="swatch__hex">#F8F8F8</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#FAFAFA"></div>
+        <div class="swatch__name">Muted</div>
+        <div class="swatch__hex">#FAFAFA</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#E8E8E8"></div>
+        <div class="swatch__name">Border</div>
+        <div class="swatch__hex">#E8E8E8</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#111827"></div>
+        <div class="swatch__name">Canvas Dark</div>
+        <div class="swatch__hex">#111827</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#222222"></div>
+        <div class="swatch__name">Ink</div>
+        <div class="swatch__hex">#222222</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__box" style="background:#666666"></div>
+        <div class="swatch__name">Text Secondary</div>
+        <div class="swatch__hex">#666666</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 2. Typography ─────────────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h2 class="ds-section-heading">2 · Typography</h2>
+    <p style="margin-bottom:var(--space-xl);font-size:13px;color:var(--color-text-secondary);">
+      Single family: <strong>Inter</strong>. Fallback: system-ui, sans-serif.
+    </p>
+    <div class="type-grid">
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>display</strong>
+          36px · 700 · lh 1.15
+        </div>
+        <span style="font-size:36px;font-weight:700;line-height:1.15">Fresh Groceries Delivered</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>heading-xl</strong>
+          20px · 700 · lh 1.3
+        </div>
+        <span style="font-size:20px;font-weight:700;line-height:1.3">Best Sellers This Week</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>heading-md</strong>
+          16px · 700 · lh 1.3
+        </div>
+        <span style="font-size:16px;font-weight:700;line-height:1.3">Farmart Organic Brand</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>price-current</strong>
+          16px · 700 · lh 1.2
+        </div>
+        <span style="font-size:16px;font-weight:700;line-height:1.2;color:var(--color-cta-green)">฿ 89.00</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>body-md</strong>
+          14px · 500 · lh 1.5
+        </div>
+        <span style="font-size:14px;font-weight:500;line-height:1.5">Organic Baby Spinach 200g – Farm fresh, packed with nutrients</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>nav-link / button</strong>
+          14px · 500–600 · lh 1.0
+        </div>
+        <span style="font-size:14px;font-weight:600;line-height:1">Add to Cart &nbsp;·&nbsp; <span style="font-weight:500">Vegetables</span></span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>body-sm</strong>
+          12px · 400 · lh 1.4
+        </div>
+        <span style="font-size:12px;font-weight:400;line-height:1.4;color:var(--color-text-secondary)">Organic range · Sourced from certified local farms</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>price-original</strong>
+          12px · 400 · lh 1.2
+        </div>
+        <span style="font-size:12px;font-weight:400;line-height:1.2;text-decoration:line-through;color:var(--color-text-secondary)">฿ 120.00</span>
+        <span style="font-size:11px;color:var(--color-danger);margin-left:8px">Only when discount &gt; 0</span>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <strong>label</strong>
+          11px · 400 · ls 0.05em
+        </div>
+        <span style="font-size:11px;font-weight:400;line-height:1.3;letter-spacing:0.05em;text-transform:uppercase;color:var(--color-text-secondary)">Vegetables · Organic</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── 3. Spacing ─────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">3 · Spacing</h2>
+    <div class="space-grid">
+      <div class="space-item">
+        <div class="space-bar" style="height:4px"></div>
+        <div class="ds-label">xs · 4px</div>
+      </div>
+      <div class="space-item">
+        <div class="space-bar" style="height:8px"></div>
+        <div class="ds-label">sm · 8px</div>
+      </div>
+      <div class="space-item">
+        <div class="space-bar" style="height:12px"></div>
+        <div class="ds-label">md · 12px</div>
+      </div>
+      <div class="space-item">
+        <div class="space-bar" style="height:16px"></div>
+        <div class="ds-label">lg · 16px</div>
+      </div>
+      <div class="space-item">
+        <div class="space-bar" style="height:24px"></div>
+        <div class="ds-label">xl · 24px</div>
+      </div>
+      <div class="space-item">
+        <div class="space-bar" style="height:32px"></div>
+        <div class="ds-label">xxl · 32px</div>
+      </div>
+      <div class="space-item">
+        <div class="space-bar" style="height:64px"></div>
+        <div class="ds-label">section · 64px</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 4. Border Radius ──────────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h2 class="ds-section-heading">4 · Border Radius</h2>
+    <div class="radius-grid">
+      <div>
+        <div class="radius-box" style="border-radius:6px">sm<br/>6px</div>
+        <div class="ds-label">buttons · inputs</div>
+      </div>
+      <div>
+        <div class="radius-box" style="border-radius:10px">card<br/>10px</div>
+        <div class="ds-label">product · brand cards</div>
+      </div>
+      <div>
+        <div class="radius-box" style="border-radius:12px">banner<br/>12px</div>
+        <div class="ds-label">hero · category · panel</div>
+      </div>
+      <div>
+        <div class="radius-box" style="border-radius:9999px">full<br/>pill</div>
+        <div class="ds-label">badges · logo · tags</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 5. Elevation ──────────────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">5 · Elevation & Shadows</h2>
+    <div class="elevation-row">
+      <div>
+        <div class="elevation-card" style="box-shadow:none">
+          <p>Level 0</p>
+          <span>No shadow · nav · footer</span>
+        </div>
+        <div class="ds-label">Flat</div>
+      </div>
+      <div>
+        <div class="elevation-card" style="box-shadow:0 2px 8px rgba(0,0,0,.08)">
+          <p>Level 1</p>
+          <span>shadow-card · resting cards · navbar</span>
+        </div>
+        <div class="ds-label">Card rest</div>
+      </div>
+      <div>
+        <div class="elevation-card" style="box-shadow:0 8px 24px rgba(0,0,0,.12);transform:translateY(-4px)">
+          <p>Level 2</p>
+          <span>shadow-md · hover state</span>
+        </div>
+        <div class="ds-label">Card hover (–1px Y)</div>
+      </div>
+      <div>
+        <div class="elevation-card" style="background:rgba(0,0,0,0.4);border:none;border-radius:var(--rounded-card)">
+          <p style="color:white">Overlay</p>
+          <span style="color:rgba(255,255,255,0.7)">bg-black/40 · cart backdrop</span>
+        </div>
+        <div class="ds-label">Backdrop</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 6. Buttons ─────────────────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h2 class="ds-section-heading">6 · Buttons</h2>
+
+    <p style="margin-bottom:var(--space-md);font-size:12px;color:var(--color-text-secondary);">
+      Amber = browse/navigation &nbsp;|&nbsp; Green = purchase action. Never swap.
+    </p>
+    <div class="btn-row" style="margin-bottom:var(--space-xxl)">
+      <div>
+        <button class="btn btn--primary">Category</button>
+        <div class="ds-label">button-primary (Browse)</div>
+      </div>
+      <div>
+        <button class="btn btn--primary" style="background:var(--color-primary-hover)">Category</button>
+        <div class="ds-label">Hover state</div>
+      </div>
+      <div style="width:200px">
+        <button class="btn btn--add-to-cart">+ Add to Cart</button>
+        <div class="ds-label">button-add-to-cart (Purchase)</div>
+      </div>
+      <div style="width:200px">
+        <button class="btn btn--checkout">Checkout</button>
+        <div class="ds-label">button-checkout</div>
+      </div>
+      <div>
+        <button class="btn btn--membership">Join Membership</button>
+        <div class="ds-label">button-membership-submit</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 7. Badges ─────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">7 · Badges</h2>
+    <div class="badge-row">
+      <div>
+        <span class="badge badge--discount">-25%</span>
+        <div class="ds-label">discount-badge</div>
+      </div>
+      <div>
+        <span class="badge badge--new">New</span>
+        <div class="ds-label">new-badge (when !discount)</div>
+      </div>
+      <div>
+        <span class="badge badge--cart">3</span>
+        <div class="ds-label">cart-count-badge</div>
+      </div>
+      <div>
+        <span class="badge badge--eyebrow" style="font-size:12px;font-weight:700">🔥 Flash Sale</span>
+        <div class="ds-label">eyebrow-tag</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 8. Cards ──────────────────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h2 class="ds-section-heading">8 · Cards</h2>
+
+    <p style="margin-bottom:var(--space-xl);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Product Cards (scroll row)</p>
+    <div class="scroll-row" style="margin-bottom:var(--space-xxl)">
+
+      <!-- Card with discount -->
+      <div class="product-card">
+        <div class="product-card__img">
+          🥦
+          <span class="badge badge--discount product-card__badge">-20%</span>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__cat">Vegetables</div>
+          <div class="product-card__name">Organic Broccoli 500g Fresh from the farm</div>
+          <div class="product-card__price-row">
+            <span class="product-card__price">฿ 72.00</span>
+            <span class="product-card__price-orig">฿ 90.00</span>
+          </div>
+          <div class="product-card__stars">★★★★☆ <span style="color:var(--color-text-secondary)">(128)</span></div>
+          <button class="btn btn--add-to-cart">+ Add to Cart</button>
+        </div>
+      </div>
+
+      <!-- Card with new badge -->
+      <div class="product-card">
+        <div class="product-card__img">
+          🍓
+          <span class="badge badge--new product-card__badge">New</span>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__cat">Fruits</div>
+          <div class="product-card__name">Premium Strawberry Pack 250g</div>
+          <div class="product-card__price-row">
+            <span class="product-card__price">฿ 149.00</span>
+          </div>
+          <div class="product-card__stars">★★★★★ <span style="color:var(--color-text-secondary)">(42)</span></div>
+          <button class="btn btn--add-to-cart">+ Add to Cart</button>
+        </div>
+      </div>
+
+      <!-- Card no badge -->
+      <div class="product-card">
+        <div class="product-card__img">🥛</div>
+        <div class="product-card__body">
+          <div class="product-card__cat">Dairy</div>
+          <div class="product-card__name">Full Cream Fresh Milk 1L</div>
+          <div class="product-card__price-row">
+            <span class="product-card__price">฿ 59.00</span>
+          </div>
+          <div class="product-card__stars">★★★★☆ <span style="color:var(--color-text-secondary)">(210)</span></div>
+          <button class="btn btn--add-to-cart">+ Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-card__img">
+          🥩
+          <span class="badge badge--discount product-card__badge">-15%</span>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__cat">Meat</div>
+          <div class="product-card__name">Wagyu Beef Striploin 200g</div>
+          <div class="product-card__price-row">
+            <span class="product-card__price">฿ 340.00</span>
+            <span class="product-card__price-orig">฿ 400.00</span>
+          </div>
+          <div class="product-card__stars">★★★★★ <span style="color:var(--color-text-secondary)">(64)</span></div>
+          <button class="btn btn--add-to-cart">+ Add to Cart</button>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="margin-bottom:var(--space-xl);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Category Cards</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-lg);margin-bottom:var(--space-xxl)">
+      <div class="category-card">
+        <div class="category-card__icon" style="background:#dcfce7">🥦</div>
+        <div class="category-card__name">Vegetables</div>
+      </div>
+      <div class="category-card">
+        <div class="category-card__icon" style="background:#fef9c3">🍎</div>
+        <div class="category-card__name">Fruits</div>
+      </div>
+      <div class="category-card">
+        <div class="category-card__icon" style="background:#fce7f3">🥩</div>
+        <div class="category-card__name">Meat</div>
+      </div>
+      <div class="category-card">
+        <div class="category-card__icon" style="background:#e0f2fe">🥛</div>
+        <div class="category-card__name">Dairy</div>
+      </div>
+    </div>
+
+    <p style="margin-bottom:var(--space-xl);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Brand Cards</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-xl)">
+      <div class="brand-card">
+        <div class="brand-card__img" style="background:linear-gradient(to bottom right,#166534,#16a34a)">
+          <span>🌿</span>
+          <span class="brand-card__brand-name">FarmGreen</span>
+        </div>
+        <div class="brand-card__body">
+          <div class="brand-card__title">FarmGreen</div>
+          <div class="brand-card__sub">Certified Organic</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-card__img" style="background:linear-gradient(to bottom right,#7c3aed,#a78bfa)">
+          <span>🐄</span>
+          <span class="brand-card__brand-name">DairyPlus</span>
+        </div>
+        <div class="brand-card__body">
+          <div class="brand-card__title">DairyPlus</div>
+          <div class="brand-card__sub">Farm Fresh Dairy</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-card__img" style="background:linear-gradient(to bottom right,#b45309,#f59e0b)">
+          <span>🥩</span>
+          <span class="brand-card__brand-name">PrimeCut</span>
+        </div>
+        <div class="brand-card__body">
+          <div class="brand-card__title">PrimeCut</div>
+          <div class="brand-card__sub">Premium Meat</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-card__img" style="background:linear-gradient(to bottom right,#0e7490,#22d3ee)">
+          <span>🐟</span>
+          <span class="brand-card__brand-name">SeaFresh</span>
+        </div>
+        <div class="brand-card__body">
+          <div class="brand-card__title">SeaFresh</div>
+          <div class="brand-card__sub">Wild-Caught Seafood</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── 9. Navigation Preview ─────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">9 · Navigation</h2>
+    <div class="navbar-demo">
+      <!-- Topbar (80px) -->
+      <div class="nav-topbar">
+        <div class="nav-logo">F</div>
+        <div class="nav-search">
+          <input type="text" placeholder="ค้นหาสินค้า เช่น ผัก ผลไม้ เนื้อสัตว์..." />
+          <button class="btn btn--primary">Search</button>
+        </div>
+        <div class="nav-icons">
+          <button class="nav-icon-btn">👤</button>
+          <button class="nav-icon-btn">
+            🛒
+            <span class="badge badge--cart">3</span>
+          </button>
+        </div>
+      </div>
+      <!-- Nav row (52px) -->
+      <div class="nav-row-bar">
+        <button class="btn btn--primary" style="font-size:13px;padding:6px 14px">☰ Category</button>
+        <span class="nav-link">Promotions</span>
+        <span class="nav-link">Fresh Today</span>
+        <span class="nav-link">Best Sellers</span>
+        <span class="nav-link nav-link--danger">🔥 Hot Deal</span>
+        <span class="nav-link">Membership</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 10. Hero Banner Preview ───────────────────────────────────── -->
+<div class="section section--surface">
+  <div class="container">
+    <h2 class="ds-section-heading">10 · Hero Banner</h2>
+    <div class="hero-grid">
+      <div class="hero-main">
+        <div class="hero-main__emoji" aria-hidden="true">🥦</div>
+        <div class="hero-main__eyebrow">
+          <span class="badge badge--eyebrow" style="font-size:12px;font-weight:700">🔥 Flash Sale</span>
+        </div>
+        <h1 class="hero-main">Fresh Groceries<br/>Delivered Fast</h1>
+        <button class="btn btn--checkout" style="width:auto;padding:10px 24px">Shop Now →</button>
+      </div>
+      <div class="hero-promos">
+        <div class="hero-promo">
+          <h3>🍎 Fresh Fruits</h3>
+          <p>Up to 30% off seasonal picks</p>
+        </div>
+        <div class="hero-promo" style="background:linear-gradient(to bottom right,#fce7f3,#fbcfe8)">
+          <h3>🥩 Premium Meat</h3>
+          <p>Weekend special bundle deals</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 11. Membership Panel ──────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h2 class="ds-section-heading">11 · Membership Panel</h2>
+    <div style="max-width:380px">
+      <div class="membership-panel">
+        <span class="badge badge--eyebrow" style="font-size:11px">⭐ Member Exclusive</span>
+        <h3>Join & Save 15%</h3>
+        <p>Unlock member pricing on every order. Cancel anytime.</p>
+        <input class="membership-input" type="email" placeholder="Email address" />
+        <input class="membership-input" type="password" placeholder="Password" />
+        <button class="btn btn--membership" style="width:100%;margin-top:var(--space-sm)">Create Account</button>
+        <div class="membership-fine">By joining you agree to our Terms of Service and Privacy Policy.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 12. Cart Drawer Preview ───────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">12 · Cart Drawer</h2>
+    <div class="cart-drawer-demo">
+      <h3>🛒 My Cart (2)</h3>
+
+      <div class="cart-item">
+        <div class="cart-item__img">🥦</div>
+        <div style="flex:1">
+          <div class="cart-item__name">Organic Broccoli 500g</div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Vegetables</div>
+          <div class="cart-qty">
+            <button>−</button>
+            <span>2</span>
+            <button>+</button>
+          </div>
+        </div>
+        <div class="cart-item__price">฿ 144.00</div>
+      </div>
+
+      <div class="cart-item">
+        <div class="cart-item__img">🍓</div>
+        <div style="flex:1">
+          <div class="cart-item__name">Premium Strawberry 250g</div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary)">Fruits</div>
+          <div class="cart-qty">
+            <button>−</button>
+            <span>1</span>
+            <button>+</button>
+          </div>
+        </div>
+        <div class="cart-item__price">฿ 149.00</div>
+      </div>
+
+      <div class="cart-total">
+        <div class="cart-total__row">
+          <span>Subtotal</span>
+          <span>฿ 293.00</span>
+        </div>
+        <div class="cart-total__row cart-total__discount">
+          <span>Member Discount (15%)</span>
+          <span>−฿ 43.95</span>
+        </div>
+        <div class="cart-total__row">
+          <span style="font-weight:600">Total</span>
+          <span class="cart-total__grand">฿ 249.05</span>
+        </div>
+      </div>
+
+      <button class="btn btn--checkout">Proceed to Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 13. Footer Preview ────────────────────────────────────────── -->
+<div class="section section--muted">
+  <div class="container">
+    <h2 class="ds-section-heading">13 · Footer</h2>
+    <div class="footer-demo">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-logo"><span>F</span>armart</div>
+          <p style="font-size:12px;color:#9ca3af;line-height:1.6">Fresh groceries delivered<br/>to your door. Every day.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Help</h4>
+          <ul>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Delivery Info</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Shopping</h4>
+          <ul>
+            <li><a href="#">New Arrivals</a></li>
+            <li><a href="#">Best Sellers</a></li>
+            <li><a href="#">Flash Deals</a></li>
+            <li><a href="#">Membership</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bar">
+        <p>© 2026 Farmart. All rights reserved.</p>
+        <div class="payment-chips">
+          <span class="payment-chip">VISA</span>
+          <span class="payment-chip">MC</span>
+          <span class="payment-chip">PayPal</span>
+          <span class="payment-chip">PromptPay</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 14. Do's & Don'ts ─────────────────────────────────────────── -->
+<div class="section">
+  <div class="container">
+    <h2 class="ds-section-heading">14 · Do's & Don'ts</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xxl)">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--color-cta-green);margin-bottom:var(--space-lg)">✅ Do</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--space-sm)">
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#dcfce7;border-radius:var(--rounded-sm)">Use <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">bg-green-600</code> for every purchase action: Add to Cart, Checkout, Shop Now, Membership Submit.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#dcfce7;border-radius:var(--rounded-sm)">Use amber <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">#F4B223</code> for all navigation/browse actions.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#dcfce7;border-radius:var(--rounded-sm)">Render <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">DiscountBadge</code> only when <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">discount &gt; 0</code>.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#dcfce7;border-radius:var(--rounded-sm)">Format all prices through <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">formatPrice()</code>. Never raw numbers.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#dcfce7;border-radius:var(--rounded-sm)">Use <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">rounded-card</code> (10px) on ProductCard/BrandCard; <code style="background:#bbf7d0;padding:1px 5px;border-radius:4px">rounded-banner</code> (12px) on panels/hero.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#dcfce7;border-radius:var(--rounded-sm)">Test every component at 375px viewport before marking task done.</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--color-danger);margin-bottom:var(--space-lg)">❌ Don't</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--space-sm)">
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#fee2e2;border-radius:var(--rounded-sm)">Don't install UI libraries (shadcn, MUI, Chakra). Tailwind only.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#fee2e2;border-radius:var(--rounded-sm)">Don't use <code style="background:#fecaca;padding:1px 5px;border-radius:4px">bg-success</code> (#3BAE5A) for purchase buttons — that's for status text and New badge only.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#fee2e2;border-radius:var(--rounded-sm)">Don't add inline styles except for <code style="background:#fecaca;padding:1px 5px;border-radius:4px">category.color</code> on CategoryCard icon circles.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#fee2e2;border-radius:var(--rounded-sm)">Don't hardcode product/category data inside components — always import from <code style="background:#fecaca;padding:1px 5px;border-radius:4px">src/data/</code>.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#fee2e2;border-radius:var(--rounded-sm)">Don't use <code style="background:#fecaca;padding:1px 5px;border-radius:4px">any</code> in TypeScript — strict mode is on.</li>
+          <li style="font-size:13px;padding:var(--space-sm) var(--space-md);background:#fee2e2;border-radius:var(--rounded-sm)">Don't render the strikethrough original price when <code style="background:#fecaca;padding:1px 5px;border-radius:4px">discount === 0</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Footer of DS doc ──────────────────────────────────────────── -->
+<div style="background:var(--color-canvas-dark);padding:var(--space-xl) var(--space-container-x);text-align:center">
+  <p style="font-size:12px;color:#6b7280">Farmart Design System · version alpha · Built with Inter + vanilla CSS</p>
+</div>
+
+</body>
+</html>
