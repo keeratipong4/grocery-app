@@ -1,101 +1,121 @@
-import Image from "next/image";
+import HeroBanner from '@/components/HeroBanner';
+import CategoryCard from '@/components/CategoryCard';
+import BrandCard from '@/components/BrandCard';
+import ProductCard from '@/components/ProductCard';
+import ProductRow from '@/components/ProductRow';
+import MembershipModal from '@/components/MembershipModal';
+import SectionHeader from '@/components/SectionHeader';
+import { categories, brands } from '@/data/categories';
+import { topSaverProducts, bestSellerProducts, justLandingProducts } from '@/data/products';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <>
+      <HeroBanner />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Browse By Category */}
+      <section className="py-16 bg-white">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <SectionHeader title="เลือกซื้อตามหมวดหมู่" href="#" />
+          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-4">
+            {categories.map(cat => (
+              <CategoryCard key={cat.id} category={cat} />
+            ))}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* Featured Brands */}
+      <section className="py-16 bg-muted">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <SectionHeader title="แบรนด์แนะนำ" href="#" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {brands.map(brand => (
+              <BrandCard key={brand.id} brand={brand} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Top Saver Today */}
+      <section className="py-16 bg-white">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <SectionHeader title="สินค้าราคาพิเศษวันนี้" href="#" />
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 items-start">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5">
+              {topSaverProducts.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            <MembershipModal />
+          </div>
+        </div>
+      </section>
+
+      {/* Best Seller */}
+      <section className="py-16 bg-muted">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <SectionHeader title="สินค้าขายดี" href="#" />
+          <ProductRow products={bestSellerProducts} />
+        </div>
+      </section>
+
+      {/* Just Landing */}
+      <section className="py-16 bg-white">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <SectionHeader title="สินค้าใหม่มาใหม่" href="#" />
+          <ProductRow products={justLandingProducts} />
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300">
+        <div className="max-w-[1280px] mx-auto px-6 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">F</span>
+              <span className="text-xl font-bold text-white">farmart</span>
+            </div>
+            <p className="text-sm leading-relaxed text-gray-400 max-w-[200px]">
+              พันธมิตรร้านขายของชำออนไลน์ที่คุณไว้ใจได้ สินค้าสดใหม่ส่งถึงบ้านทุกวัน
+            </p>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">บริษัท</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              {['เกี่ยวกับเรา', 'ร่วมงานกับเรา', 'ข่าวสาร', 'บล็อก'].map(l => (
+                <li key={l}><a href="#" className="hover:text-primary transition-colors">{l}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">ช่วยเหลือ</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              {['ศูนย์ช่วยเหลือ', 'ติดตามออเดอร์', 'คืนสินค้า', 'ติดต่อเรา'].map(l => (
+                <li key={l}><a href="#" className="hover:text-primary transition-colors">{l}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">ช้อปปิ้ง</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              {['ผัก', 'ผลไม้', 'นม & ไข่', 'เนื้อสัตว์ & อาหารทะเล'].map(l => (
+                <li key={l}><a href="#" className="hover:text-primary transition-colors">{l}</a></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-white/10 py-5 px-6">
+          <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500">
+            <p>© 2025 Farmart. สงวนลิขสิทธิ์</p>
+            <div className="flex gap-2">
+              {['VISA', 'MC', 'PayPal', 'PromptPay'].map(p => (
+                <span key={p} className="bg-white/10 text-gray-300 text-xs font-bold px-2 py-1 rounded">{p}</span>
+              ))}
+            </div>
+          </div>
+        </div>
       </footer>
-    </div>
+    </>
   );
 }

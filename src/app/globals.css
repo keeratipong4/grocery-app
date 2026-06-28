@@ -3,25 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: #F4B223;
+  --color-success: #3BAE5A;
+  --color-danger:  #E64C3C;
+  --color-border:  #E8E8E8;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: #222222;
+  background: #ffffff;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Horizontal scroll rows — hide scrollbar visually */
+.scroll-row {
+  scrollbar-width: thin;
+  scrollbar-color: #E8E8E8 transparent;
 }
+.scroll-row::-webkit-scrollbar { height: 4px; }
+.scroll-row::-webkit-scrollbar-track { background: transparent; }
+.scroll-row::-webkit-scrollbar-thumb { background: #E8E8E8; border-radius: 2px; }
