@@ -367,12 +367,12 @@ Product images use `aspect-[4/3]` with `object-cover` and `next/image` fill. The
 
 ### Badges
 
-**`discount-badge`** — rendered by `DiscountBadge` component, only when `discount > 0`.
+**`discount-badge`** — rendered by `DiscountBadge` (`src/components/DiscountBadge.tsx`), only when `discount > 0`.
 - Background `{colors.danger}`, text `{colors.canvas}`, `{typography.body-sm}` font-bold, `{rounded.full}`, padding 2px 8px.
 - Position: `absolute top-2 left-2` inside the product image container.
 - Label: `-{discount}%`.
 
-**`new-badge`** — rendered inside ProductCard when `isNew === true && discount === 0`.
+**`new-badge`** — rendered by `NewBadge` (`src/components/NewBadge.tsx`) when `isNew === true && discount === 0`.
 - Background `{colors.success}`, text `{colors.canvas}`, `{typography.body-sm}` font-bold, `{rounded.full}`.
 - Position: `absolute top-2 left-2`. Mutually exclusive with `discount-badge` — discount takes priority.
 
@@ -415,7 +415,7 @@ Left → right: "Category" button (`button-primary`) → nav links → mobile ha
 
 ### Panels & Overlays
 
-**`membership-panel`** — dark green gradient sidebar.
+**`membership-panel`** — `MembershipPanel` (`src/components/MembershipPanel.tsx`). Dark green gradient sidebar.
 - `bg-gradient-to-b from-green-900 to-green-800`, `{rounded.banner}`, padding `p-7`, text white.
 - Logged-out: eyebrow tag + headline + body copy + form (email + password) + submit + TOS fine print.
 - Logged-in: switches to confirmation state showing email and 15% discount confirmation.

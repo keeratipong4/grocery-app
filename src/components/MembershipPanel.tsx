@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { useMemberStore } from '@/store/useMemberStore';
 
-export default function MembershipModal() {
+export default function MembershipPanel() {
   const { isMember, join, member } = useMemberStore();
-  const [email,      setEmail]      = useState('');
-  const [password,   setPassword]   = useState('');
-  const [loading,    setLoading]    = useState(false);
-  const [apiError,   setApiError]   = useState('');
-  const [success,    setSuccess]    = useState(false);
+  const [email,       setEmail]      = useState('');
+  const [password,    setPassword]   = useState('');
+  const [loading,     setLoading]    = useState(false);
+  const [apiError,    setApiError]   = useState('');
+  const [success,     setSuccess]    = useState(false);
   const [isReturning, setIsReturning] = useState(false);
 
   if (isMember()) {
@@ -30,7 +30,6 @@ export default function MembershipModal() {
     setApiError('');
 
     try {
-      // 1. Register (or login if email exists)
       const regRes = await fetch('/api/auth/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,7 +38,6 @@ export default function MembershipModal() {
 
       if (!regRes.ok) {
         if (regRes.status === 409) {
-          // Email already exists — attempt login instead
           const loginRes = await fetch('/api/auth/login', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -58,7 +56,6 @@ export default function MembershipModal() {
         }
       }
 
-      // 2. Sync local Zustand state (join() also activates membership on server)
       join(email);
       setSuccess(true);
     } catch {

@@ -3,7 +3,7 @@ import CategoryCard from '@/components/CategoryCard';
 import BrandCard from '@/components/BrandCard';
 import ProductCard from '@/components/ProductCard';
 import ProductRow from '@/components/ProductRow';
-import MembershipModal from '@/components/MembershipModal';
+import MembershipPanel from '@/components/MembershipPanel';
 import SectionHeader from '@/components/SectionHeader';
 import { categories, brands } from '@/data/categories';
 import { topSaverProducts, bestSellerProducts, justLandingProducts } from '@/data/products';
@@ -47,7 +47,7 @@ export default function HomePage() {
                 <ProductCard key={product.id} product={product} priority={i === 0} />
               ))}
             </div>
-            <MembershipModal />
+            <MembershipPanel />
           </div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import type { Product } from '@/types';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
 import { useCartStore } from '@/store/useCartStore';
 import DiscountBadge from './DiscountBadge';
+import NewBadge from './NewBadge';
 
 interface Props {
   product: Product;
@@ -32,11 +33,7 @@ export default function ProductCard({ product, priority = false }: Props) {
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <DiscountBadge discount={product.discount} />
-        {product.isNew && product.discount === 0 && (
-          <span className="absolute top-2 left-2 bg-success text-white text-xs font-bold px-2 py-0.5 rounded-full">
-            ใหม่
-          </span>
-        )}
+        <NewBadge isNew={product.isNew} discount={product.discount} />
       </div>
 
       <div className="flex flex-col gap-1 p-3">

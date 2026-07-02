@@ -24,7 +24,7 @@ An online grocery store where customers can search and buy groceries (vegetables
 | 3 | Stores | `src/store/useCartStore.ts`, `src/store/useMemberStore.ts` |
 | 4 | Utilities | `src/lib/utils.ts` |
 | 5 | Layout | `src/app/layout.tsx`, `src/components/layout/Navbar.tsx` |
-| 6 | Components | `ProductCard`, `CartDrawer`, `MembershipModal` |
+| 6 | Components | `ProductCard`, `CartDrawer`, `MembershipPanel`, `NewBadge` |
 | 7 | Pages | `/`, `/category/[slug]`, `/product/[id]`, `/cart`, `/search`, `/checkout` |
 
 ---
