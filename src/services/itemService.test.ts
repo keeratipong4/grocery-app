@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getItems, createItem } from './itemService';
-import { prisma } from '../lib/db';
+import { prisma } from '../lib/prisma';
 
 test('itemService tests', async (t) => {
   // Clean up database before running tests
