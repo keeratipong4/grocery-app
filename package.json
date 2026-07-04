@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "tsx --test src/__tests__/unit/utils.test.ts src/__tests__/unit/api-helpers.test.ts src/__tests__/unit/server-store.test.ts src/__tests__/integration/auth.test.ts src/__tests__/integration/cart.test.ts src/__tests__/integration/products.test.ts src/__tests__/integration/membership.test.ts src/__tests__/integration/checkout.test.ts src/__tests__/integration/items.test.ts",
+    "test:unit": "tsx --test src/__tests__/unit/utils.test.ts src/__tests__/unit/api-helpers.test.ts src/__tests__/unit/server-store.test.ts",
+    "test:integration": "tsx --test src/__tests__/integration/auth.test.ts src/__tests__/integration/cart.test.ts src/__tests__/integration/products.test.ts src/__tests__/integration/membership.test.ts src/__tests__/integration/checkout.test.ts src/__tests__/integration/items.test.ts",
+    "test:report": "tsx scripts/generate-report.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.8.0",

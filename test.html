@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farmart — Test Report</title>
+<style>
+  /* ── Farmart design tokens ── */
+  :root {
+    --primary:       #F4B223;
+    --primary-hover: #D89A0D;
+    --cta-green:     #16a34a;
+    --cta-hover:     #15803d;
+    --success:       #3BAE5A;
+    --danger:        #E64C3C;
+    --canvas:        #ffffff;
+    --surface:       #F8F8F8;
+    --muted-bg:      #FAFAFA;
+    --border:        #E8E8E8;
+    --ink:           #222222;
+    --text-sec:      #666666;
+    --canvas-dark:   #111827;
+
+    --r-sm:     6px;
+    --r-card:   10px;
+    --r-banner: 12px;
+    --r-full:   9999px;
+
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-md:   0 8px 24px rgba(0,0,0,.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--canvas);
+         color: var(--ink); line-height: 1.6; font-size: 14px; }
+
+  /* ── Layout ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Nav-topbar style header ── */
+  header {
+    background: var(--canvas);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    padding: 0;
+    position: sticky; top: 0; z-index: 30;
+  }
+  .header-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    height: 80px;
+  }
+  .brand { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; color: var(--ink); }
+  .brand span { color: var(--primary); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .generated { font-size: 11px; color: var(--text-sec); letter-spacing: .05em; }
+  .header-tag {
+    background: var(--primary); color: var(--canvas);
+    font-size: 11px; font-weight: 700; padding: 4px 12px;
+    border-radius: var(--r-full); letter-spacing: .05em; text-transform: uppercase;
+  }
+
+  /* ── Hero summary panel (banner style) ── */
+  .hero-banner {
+    background: linear-gradient(to bottom right, #dcfce7, #bbf7d0, #86efac);
+    border-radius: var(--r-banner);
+    padding: 32px 40px;
+    display: flex; align-items: center; gap: 40px;
+    margin: 24px 0;
+    box-shadow: var(--shadow-card);
+  }
+  .ring-wrap { flex-shrink: 0; }
+  .ring-svg  { width: 110px; height: 110px; }
+  .ring-track { fill: none; stroke: rgba(0,0,0,.12); stroke-width: 8; }
+  .ring-fill  { fill: none; stroke-width: 8; stroke-linecap: round;
+                transform: rotate(-90deg); transform-origin: 50% 50%; }
+  .ring-text  { font-size: 1.35rem; font-weight: 800; fill: var(--ink); }
+  .ring-sub   { font-size: .5rem; fill: var(--text-sec); letter-spacing: .05em; text-transform: uppercase; }
+  .hero-stats { flex: 1; }
+  .hero-eyebrow {
+    display: inline-block;
+    background: var(--primary); color: var(--canvas);
+    font-size: 11px; font-weight: 700; padding: 4px 12px;
+    border-radius: var(--r-full); margin-bottom: 12px; letter-spacing: .05em;
+  }
+  .hero-title { font-size: 20px; font-weight: 700; line-height: 1.3; color: var(--ink); margin-bottom: 16px; }
+  .hero-row   { display: flex; gap: 32px; flex-wrap: wrap; }
+  .hero-stat .val { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+  .hero-stat .lbl { font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+  .hero-stat.green .val { color: var(--cta-green); }
+  .hero-stat.red   .val { color: var(--danger); }
+  .hero-stat.ink   .val { color: var(--ink); }
+  .hero-stat.amber .val { color: var(--primary-hover); }
+
+  /* ── Summary cards (product-card style) ── */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .card {
+    background: var(--canvas); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: 16px; text-align: center;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .card-value { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+  .card-label { font-size: 11px; color: var(--text-sec); margin-top: 4px;
+                text-transform: uppercase; letter-spacing: .05em; }
+  .card.pass  .card-value { color: var(--cta-green); }
+  .card.fail  .card-value { color: var(--danger); }
+  .card.amber .card-value { color: var(--primary-hover); }
+  .card.ink   .card-value { color: var(--ink); }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: 16px; font-weight: 700; color: var(--ink);
+    margin: 32px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: ''; display: inline-block; width: 4px; height: 16px;
+    background: var(--primary); border-radius: var(--r-full); flex-shrink: 0;
+  }
+
+  /* ── File sections (card style) ── */
+  .file-section {
+    background: var(--canvas); border: 1px solid var(--border);
+    border-radius: var(--r-card); margin-bottom: 12px; overflow: hidden;
+    box-shadow: var(--shadow-card);
+  }
+  .file-section.error-section { border-color: var(--danger); }
+  .file-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+    background: var(--canvas);
+  }
+  .file-header:hover { background: var(--surface); }
+  .file-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; color: var(--ink); }
+  .file-meta  { display: flex; align-items: center; gap: 10px; }
+  .stat { font-size: 12px; color: var(--text-sec); }
+  .chevron { font-size: 10px; color: var(--text-sec); transition: transform .2s; }
+  .file-section.collapsed .chevron  { transform: rotate(-90deg); }
+  .file-section.collapsed .table-wrap { display: none; }
+
+  /* ── Type tags (eyebrow-tag style) ── */
+  .type-tag {
+    font-size: 11px; font-weight: 700; padding: 2px 10px;
+    border-radius: var(--r-full); text-transform: uppercase; letter-spacing: .07em;
+  }
+  .type-tag.unit { background: rgba(244,178,35,.15); color: #92650a; }
+  .type-tag.intg { background: rgba(22,163,74,.12);  color: #14532d; }
+
+  /* ── Badges (pill style) ── */
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 2px 10px;
+    border-radius: var(--r-full); text-transform: uppercase; letter-spacing: .05em;
+  }
+  .badge.pass { background: var(--cta-green); color: var(--canvas); }
+  .badge.fail { background: var(--danger);    color: var(--canvas); }
+
+  /* ── Progress bar ── */
+  .progress-wrap { height: 3px; background: var(--border); overflow: hidden; margin: 0; }
+  .progress-bar  { height: 100%; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; padding: 0 16px 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; color: var(--text-sec); font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; padding: 8px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  td.indent { padding-left: 28px; }
+  tr.row-fail td { background: rgba(230,76,60,.05); }
+  tr.suite-header td {
+    background: var(--surface); padding: 8px 16px;
+    border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  tr.suite-fail td { background: rgba(230,76,60,.08); }
+  .suite-count { font-size: 11px; color: var(--text-sec); margin-left: 8px; }
+  .error-msg   { color: var(--danger); font-size: 12px; font-family: monospace; word-break: break-word; }
+  .pass-icon   { color: var(--cta-green); }
+  .fail-icon   { color: var(--danger); }
+
+  /* ── Route coverage table ── */
+  .route-table-wrap {
+    background: var(--canvas); border: 1px solid var(--border);
+    border-radius: var(--r-card); overflow: hidden; margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .route-table-wrap td { padding: 8px 16px; }
+  .route-table-wrap th { padding: 8px 16px; }
+  tr.uncovered td { color: var(--text-sec); }
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px;
+    background: var(--surface); padding: 2px 6px; border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+  }
+  .muted { color: var(--text-sec); }
+
+  /* ── Gaps box ── */
+  .gaps-box {
+    background: var(--canvas); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: 24px; margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .gap-group { margin-bottom: 20px; }
+  .gap-group:last-child { margin-bottom: 0; }
+  .gap-group h4 {
+    font-size: 12px; font-weight: 700; color: var(--primary-hover);
+    text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px;
+  }
+  .gap-group ul { list-style: none; padding: 0; }
+  .gap-group li {
+    font-size: 13px; color: var(--text-sec); padding: 4px 0 4px 20px; position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .gap-group li:last-child { border-bottom: none; }
+  .gap-group li::before { content: '→'; position: absolute; left: 0; color: var(--border); }
+
+  /* ── Error pre ── */
+  .error-pre {
+    font-family: monospace; font-size: 12px;
+    background: rgba(230,76,60,.06); padding: 16px 18px;
+    color: var(--danger); white-space: pre-wrap;
+    border-top: 1px solid rgba(230,76,60,.2);
+  }
+
+  /* ── Footer ── */
+  footer {
+    background: var(--canvas-dark); color: #d1d5db;
+    padding: 32px 24px; margin-top: 48px; font-size: 12px;
+  }
+  footer .container { display: flex; justify-content: space-between; align-items: center; }
+  .footer-brand { font-size: 14px; font-weight: 700; color: #fff; }
+  .footer-brand span { color: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- Nav-topbar style header -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="brand">Farm<span>art</span></div>
+      <div class="header-right">
+        <span class="generated">สร้างเมื่อ 4/7/2569 20:04:47</span>
+        <span class="header-tag">Test Report</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Hero banner (hero-banner-main style) -->
+  <div class="hero-banner">
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 110 110">
+          <circle class="ring-track" cx="55" cy="55" r="46"/>
+          <circle class="ring-fill" cx="55" cy="55" r="46"
+            stroke="#16a34a"
+            stroke-dasharray="289.0265"
+            stroke-dashoffset="0.0000"/>
+          <text class="ring-text" x="55" y="60" text-anchor="middle">100.0%</text>
+          <text class="ring-sub"  x="55" y="75" text-anchor="middle">PASS RATE</text>
+        </svg>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-eyebrow">Test Summary</div>
+      <div class="hero-title">Farmart API Test Results</div>
+      <div class="hero-row">
+        <div class="hero-stat green"><div class="val">138</div><div class="lbl">Passed</div></div>
+        <div class="hero-stat red">  <div class="val">0</div><div class="lbl">Failed</div></div>
+        <div class="hero-stat ink">  <div class="val">138</div><div class="lbl">Total</div></div>
+        <div class="hero-stat amber"><div class="val">2.9s</div><div class="lbl">Duration</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary cards (product-card style) -->
+  <div class="cards">
+    <div class="card pass">
+      <div class="card-value">37/37</div>
+      <div class="card-label">Unit Tests</div>
+    </div>
+    <div class="card pass">
+      <div class="card-value">101/101</div>
+      <div class="card-label">Integration Tests</div>
+    </div>
+    <div class="card amber">
+      <div class="card-value">95%</div>
+      <div class="card-label">Route Coverage</div>
+    </div>
+    <div class="card ink">
+      <div class="card-value">2.93s</div>
+      <div class="card-label">Total Duration</div>
+    </div>
+  </div>
+
+  <!-- Unit test results -->
+  <div class="section-title">Unit Tests</div>
+  
+  <section class="file-section" id="file-0">
+    <div class="file-header" onclick="toggleSection('file-0')">
+      <div class="file-title"><span class="type-tag unit">Unit</span> Utils (formatPrice, calcDiscountedPrice)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">11/11</span>
+        <span class="stat muted">119 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-0">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>formatPrice</strong>
+        <span class="suite-count">4/4</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> formats zero</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> formats whole number</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> formats large number with Thai locale separator</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> formats negative number</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>formatPrice</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>calcDiscountedPrice</strong>
+        <span class="suite-count">7/7</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns full price when discount is 0</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> applies 20% discount correctly</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> applies 15% discount correctly</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rounds result with Math.round</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 0 on 100% discount</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> handles product id=7: 390 price 30% discount = 273</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> does not change price when product has no discount (id=3 price=59 disc=0)</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>calcDiscountedPrice</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-1">
+    <div class="file-header" onclick="toggleSection('file-1')">
+      <div class="file-title"><span class="type-tag unit">Unit</span> API Helpers (isValidEmail, hash, verify)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">14/14</span>
+        <span class="stat muted">320 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-1">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>isValidEmail</strong>
+        <span class="suite-count">8/8</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> accepts valid email</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> accepts email with subdomain</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rejects missing @</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rejects missing domain</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rejects missing local part</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rejects plain string</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rejects empty string</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rejects email with spaces</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>isValidEmail</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>hashPassword / verifyPassword</strong>
+        <span class="suite-count">6/6</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> hashPassword returns salt:hash format</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> hashPassword produces different hashes for same password (random salt)</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> verifyPassword returns true for correct password</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> verifyPassword returns false for wrong password</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> verifyPassword returns false for malformed stored hash</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> verifyPassword returns false for empty stored hash</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>hashPassword / verifyPassword</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-2">
+    <div class="file-header" onclick="toggleSection('file-2')">
+      <div class="file-title"><span class="type-tag unit">Unit</span> Server Store (computeSummary, lock, cart)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">12/12</span>
+        <span class="stat muted">78 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-2">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>computeSummary</strong>
+        <span class="suite-count">5/5</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns zeros for empty cart</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> computes subtotal correctly with multiple items</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> applies member 15% discount correctly</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> rounds discount with Math.round</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> passes items through unchanged</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>computeSummary</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>getDiscountRate</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 0 for unknown session token</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 0 for logged-in non-member</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 15 for member user</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>getDiscountRate</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>getCart</strong>
+        <span class="suite-count">2/2</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns empty array for unknown token</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns stored items for known token</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>getCart</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>withCartLock</strong>
+        <span class="suite-count">2/2</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> executes the function and returns its result</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> serializes concurrent mutations — no lost updates</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>withCartLock</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Integration test results -->
+  <div class="section-title">Integration Tests</div>
+  
+  <section class="file-section" id="file-100">
+    <div class="file-header" onclick="toggleSection('file-100')">
+      <div class="file-title"><span class="type-tag intg">Integration</span> Auth API (register, login, me, logout)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">20/20</span>
+        <span class="stat muted">638 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-100">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/auth/register</strong>
+        <span class="suite-count">8/8</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> creates user and returns 201 with email</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sets farmart-session cookie on success</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when email is missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when password is missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 for invalid email format</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 for password shorter than 8 chars</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 409 for duplicate email</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 for malformed JSON</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/auth/register</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/auth/login</strong>
+        <span class="suite-count">6/6</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 200 with user data on valid credentials</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sets new session cookie on login</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 for wrong password</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 for non-existent user</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when fields are missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> merges guest cart on login</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/auth/login</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/auth/me</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns user info for authenticated request</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when no session cookie</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 for invalid session token</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/auth/me</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/auth/logout</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns success and clears cookie</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> session is invalidated after logout</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> succeeds even without a session cookie</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/auth/logout</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-101">
+    <div class="file-header" onclick="toggleSection('file-101')">
+      <div class="file-title"><span class="type-tag intg">Integration</span> Cart API (GET/DELETE cart, add/patch/remove items)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">22/22</span>
+        <span class="stat muted">120 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-101">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/cart</strong>
+        <span class="suite-count">4/4</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns empty cart summary for new guest (no cookie)</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sets farmart-session cookie for new guest</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> does not set cookie when session already exists</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns cart items for existing session</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/cart</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/cart/items</strong>
+        <span class="suite-count">11/11</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> adds a new product to cart</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> uses discounted price when product has discount</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> uses full price when product has no discount</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> increments qty when adding same product twice</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> adds multiple different products</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> defaults qty to 1 when not provided</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when productId is missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 404 for unknown productId</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 for malformed JSON</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> creates a new session token if no cookie</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> computes correct subtotal for multiple items</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/cart/items</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>PATCH /api/cart/items/:productId</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> updates quantity of existing item</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> removes item when qty &lt; 1</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when no session cookie</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>PATCH /api/cart/items/:productId</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>DELETE /api/cart/items/:productId</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> removes specific item from cart</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when no session cookie</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> succeeds even if item does not exist in cart</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>DELETE /api/cart/items/:productId</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>DELETE /api/cart</strong>
+        <span class="suite-count">1/1</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> clears all items from cart</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>DELETE /api/cart</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-102">
+    <div class="file-header" onclick="toggleSection('file-102')">
+      <div class="file-title"><span class="type-tag intg">Integration</span> Products &amp; Search &amp; Categories API</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">26/26</span>
+        <span class="stat muted">117 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-102">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/products</strong>
+        <span class="suite-count">15/15</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns all products with meta</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> filters by category slug</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns all products when category slug does not match any category (no filter applied)</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> filters by text query (q)</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns empty when query matches nothing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> filters isNew=true returns only new products</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> filters hasDiscount=true returns only discounted products</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sorts by price_asc — first item has lowest discounted price</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sorts by price_desc — first item has highest discounted price</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sorts by rating_desc</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> sorts by discount_desc</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> paginates correctly with page=2 and limit=5</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> clamps limit to 100 max</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> clamps page to 1 min when page=0</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns correct total in meta</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/products</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/products/:id</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns product for valid id</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns product with all expected fields</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 404 for unknown id</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/products/:id</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/search</strong>
+        <span class="suite-count">7/7</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns matching products for valid query</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when query is shorter than 2 chars</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when query is empty</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> respects limit param</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> clamps limit to 50 max</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns empty array for query that matches nothing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> searches by category name</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/search</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/categories</strong>
+        <span class="suite-count">1/1</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns categories list</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/categories</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-103">
+    <div class="file-header" onclick="toggleSection('file-103')">
+      <div class="file-title"><span class="type-tag intg">Integration</span> Membership API (status, join)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">9/9</span>
+        <span class="stat muted">472 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-103">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/membership</strong>
+        <span class="suite-count">5/5</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when not authenticated</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 for invalid session token</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns isMember=false for new user</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns isMember=true and 15% discount after joining</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns joinedAt date</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/membership</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/membership/join</strong>
+        <span class="suite-count">4/4</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when not authenticated</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> upgrades user to member and returns isMember=true</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 409 when user is already a member</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> member discount applies to cart after joining</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/membership/join</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-104">
+    <div class="file-header" onclick="toggleSection('file-104')">
+      <div class="file-title"><span class="type-tag intg">Integration</span> Checkout &amp; Orders API</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">13/13</span>
+        <span class="stat muted">810 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-104">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/checkout</strong>
+        <span class="suite-count">9/9</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when not authenticated</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when cart is empty</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when shippingAddress is missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when paymentMethod is missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> creates order and returns 201 with order details</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> clears cart after successful checkout</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> applies member 15% discount at checkout</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 for malformed JSON body</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> order id is unique across multiple checkouts</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/checkout</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/orders/:id</strong>
+        <span class="suite-count">4/4</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 401 when not authenticated</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 404 for non-existent order id</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns order for the owner</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 403 when user tries to access another user's order</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/orders/:id</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="file-section" id="file-105">
+    <div class="file-header" onclick="toggleSection('file-105')">
+      <div class="file-title"><span class="type-tag intg">Integration</span> Items API + Service (real SQLite)</div>
+      <div class="file-meta">
+        <span class="badge pass">PASS</span>
+        <span class="stat">11/11</span>
+        <span class="stat muted">262 ms</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:100%;background:#16a34a"></div>
+    </div>
+    <div class="table-wrap" id="table-file-105">
+      <table>
+        <thead><tr><th>Test</th><th>Duration</th><th>Error</th></tr></thead>
+        <tbody>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/items (route → real SQLite)</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns empty list when no items exist</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns items after they are created</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns items ordered by createdAt asc</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>GET /api/items (route → real SQLite)</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/items (route → real SQLite)</strong>
+        <span class="suite-count">5/5</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> creates a new item and returns 201</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> persists item to database</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when title is missing</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 400 when title is empty string</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> returns 500 for malformed JSON (route catches all errors as INTERNAL_SERVER_ERROR)</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>POST /api/items (route → real SQLite)</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>itemService (service layer → real SQLite)</strong>
+        <span class="suite-count">3/3</span>
+      </td>
+    </tr>
+    
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> createItem persists and returns item with id and createdAt</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> createItem throws when title is empty</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+      <tr class="">
+        <td class="indent"><span class="pass-icon">✔</span> getItems returns all items in createdAt order</td>
+        <td>—</td>
+        <td></td>
+      </tr>
+    <tr class="suite-header ">
+      <td colspan="3">
+        ▶ <strong>itemService (service layer → real SQLite)</strong>
+        <span class="suite-count">0/0</span>
+      </td>
+    </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Route coverage -->
+  <div class="section-title">Route Coverage (19/20 endpoints)</div>
+  <div class="route-table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Covered</th><th>Note</th></tr></thead>
+      <tbody>
+    <tr class="">
+      <td><code>GET  /api/auth/me</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/auth/register</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/auth/login</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/auth/logout</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/cart</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>DELETE /api/cart</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/cart/items</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>PATCH /api/cart/items/:id</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>DELETE /api/cart/items/:id</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/categories</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/checkout</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="uncovered">
+      <td><code>GET  /api/hello</code></td>
+      <td>⬜</td>
+      <td class="muted">smoke-test endpoint — no business logic</td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/items</code></td>
+      <td>✅</td>
+      <td class="muted">real SQLite</td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/items</code></td>
+      <td>✅</td>
+      <td class="muted">real SQLite</td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/membership</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>POST /api/membership/join</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/orders/:id</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/products</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/products/:id</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr>
+    <tr class="">
+      <td><code>GET  /api/search</code></td>
+      <td>✅</td>
+      <td class="muted"></td>
+    </tr></tbody>
+    </table>
+  </div>
+
+  <!-- Gaps -->
+  <div class="section-title">Test Gaps &amp; Known Behaviors</div>
+  <div class="gaps-box">
+    <div class="gap-group">
+      <h4>ยังไม่ได้ test</h4>
+      <ul><li>GET /api/hello — smoke-test endpoint ไม่มี business logic จึงข้ามไป</li></ul>
+    </div>
+    <div class="gap-group">
+      <h4>Known behavior (documented in tests)</h4>
+      <ul><li>GET /api/products?category=&lt;unknown_slug&gt; คืน all products แทน empty array — route ไม่ filter เมื่อ slug ไม่ match</li><li>POST /api/items + malformed JSON คืน 500 (generic catch) ต่างจาก auth/cart routes ที่คืน 400</li></ul>
+    </div>
+    <div class="gap-group">
+      <h4>Edge cases ที่ยังขาด</h4>
+      <ul><li>Cart: qty=0 ใน POST /api/cart/items (ปัจจุบัน clamp เป็น 1)</li><li>Products: sort=newest พร้อม pagination ข้าม page</li><li>Checkout: multi-item order ที่มี mix discounted + non-discounted products</li><li>Auth: ลอง login หลาย session token พร้อมกัน (concurrent login)</li><li>Items: concurrent POST /api/items (DB-level race condition)</li><li>Orders: user เข้าถึง order list ของตัวเอง (ยังไม่มี GET /api/orders endpoint)</li></ul>
+    </div></div>
+
+</div>
+
+<!-- Footer (canvas-dark) -->
+<footer>
+  <div class="container">
+    <div class="footer-brand">Farm<span>art</span> Design System</div>
+    <div>138 tests · 95% route coverage · generated 4/7/2569 20:04:47</div>
+  </div>
+</footer>
+
+<script>
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+document.querySelectorAll('.file-section').forEach(el => {
+  const hasFail = el.querySelector('.row-fail, .suite-fail, .badge.fail');
+  if (!hasFail) el.classList.add('collapsed');
+});
+</script>
+</body>
+</html>
