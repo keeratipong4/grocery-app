@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getCart, carts, computeSummary, getDiscountRate, withCartLock } from '@/lib/server-store';
-import { getToken } from '@/lib/api-helpers';
-import { products } from '@/data/products';
+import { prisma } from '@/lib/prisma';
+import { computeSummary } from '@/lib/server-store';
+import { getToken, ensureCartSession, getCartItems, getDiscountRateForToken } from '@/lib/api-helpers';
 import { calcDiscountedPrice } from '@/lib/utils';
 import { randomUUID } from 'crypto';
-import type { CartItem } from '@/types';
 
 export async function POST(req: NextRequest) {
   const existingToken = getToken(req);
@@ -22,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ code: 'VALIDATION_ERROR', message: 'กรุณาระบุ productId' }, { status: 400 });
   }
 
-  const product = products.find(p => p.id === body.productId);
+  const product = await prisma.product.findUnique({ where: { id: body.productId } });
   if (!product) {
     return NextResponse.json({ code: 'NOT_FOUND', message: 'ไม่พบสินค้า' }, { status: 404 });
   }
@@ -30,17 +29,20 @@ export async function POST(req: NextRequest) {
   const qty   = Math.max(1, body.qty ?? 1);
   const price = calcDiscountedPrice(product.price, product.discount);
 
-  const summary = await withCartLock(token, () => {
-    const items    = getCart(token);
-    const existing = items.find((i: CartItem) => i.productId === body.productId);
-    const updated: CartItem[] = existing
-      ? items.map((i: CartItem) =>
-          i.productId === body.productId ? { ...i, qty: i.qty + qty } : i
-        )
-      : [...items, { productId: product.id, name: product.name, price, qty }];
-    carts.set(token, updated);
-    return computeSummary(updated, getDiscountRate(token));
+  await ensureCartSession(token);
+  const existing = await prisma.cartItem.findUnique({
+    where: { sessionToken_productId: { sessionToken: token, productId: product.id } },
   });
+  if (existing) {
+    await prisma.cartItem.update({ where: { id: existing.id }, data: { qty: existing.qty + qty } });
+  } else {
+    await prisma.cartItem.create({
+      data: { sessionToken: token, productId: product.id, name: product.name, price, qty },
+    });
+  }
+
+  const items   = await getCartItems(token);
+  const summary = computeSummary(items, await getDiscountRateForToken(token));
 
   const res = NextResponse.json({ data: summary });
   if (!existingToken) {

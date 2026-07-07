@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { categories } from '@/data/categories';
+import { prisma } from '@/lib/prisma';
 
-export function GET() {
+export async function GET() {
+  const categories = await prisma.category.findMany();
   return NextResponse.json({ data: categories });
 }

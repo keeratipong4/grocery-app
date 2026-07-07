@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/api-helpers';
-import { users } from '@/lib/server-store';
+import { prisma } from '@/lib/prisma';
 
-export function GET(req: NextRequest) {
-  const { session, error } = requireAuth(req);
+export async function GET(req: NextRequest) {
+  const { session, error } = await requireAuth(req);
   if (error) return error;
-  const user = users.get(session.email);
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
   return NextResponse.json({
     data: {
       isMember:     user?.isMember ?? false,
       discountRate: user?.isMember ? 15 : 0,
-      joinedAt:     user?.joinedAt ?? null,
+      joinedAt:     user?.joinedAt.toISOString() ?? null,
     },
   });
 }

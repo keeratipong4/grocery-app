@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getCart, carts, computeSummary, getDiscountRate, withCartLock } from '@/lib/server-store';
-import { getToken } from '@/lib/api-helpers';
-import type { CartItem } from '@/types';
+import { prisma } from '@/lib/prisma';
+import { computeSummary } from '@/lib/server-store';
+import { getToken, getCartItems, getDiscountRateForToken } from '@/lib/api-helpers';
 
 interface Props { params: { productId: string } }
 
@@ -19,17 +19,15 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     return NextResponse.json({ code: 'VALIDATION_ERROR', message: 'ข้อมูลไม่ถูกต้อง' }, { status: 400 });
   }
 
-  const qty     = body.qty ?? 1;
-  const summary = await withCartLock(token, () => {
-    const items = getCart(token);
-    const updated: CartItem[] = qty < 1
-      ? items.filter((i: CartItem) => i.productId !== params.productId)
-      : items.map((i: CartItem) =>
-          i.productId === params.productId ? { ...i, qty } : i
-        );
-    carts.set(token, updated);
-    return computeSummary(updated, getDiscountRate(token));
-  });
+  const qty = body.qty ?? 1;
+  if (qty < 1) {
+    await prisma.cartItem.deleteMany({ where: { sessionToken: token, productId: params.productId } });
+  } else {
+    await prisma.cartItem.updateMany({ where: { sessionToken: token, productId: params.productId }, data: { qty } });
+  }
+
+  const items   = await getCartItems(token);
+  const summary = computeSummary(items, await getDiscountRateForToken(token));
   return NextResponse.json({ data: summary });
 }
 
@@ -39,10 +37,9 @@ export async function DELETE(req: NextRequest, { params }: Props) {
     return NextResponse.json({ code: 'UNAUTHORIZED', message: 'ไม่พบ session' }, { status: 401 });
   }
 
-  const summary = await withCartLock(token, () => {
-    const updated = getCart(token).filter((i: CartItem) => i.productId !== params.productId);
-    carts.set(token, updated);
-    return computeSummary(updated, getDiscountRate(token));
-  });
+  await prisma.cartItem.deleteMany({ where: { sessionToken: token, productId: params.productId } });
+
+  const items   = await getCartItems(token);
+  const summary = computeSummary(items, await getDiscountRateForToken(token));
   return NextResponse.json({ data: summary });
 }

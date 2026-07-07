@@ -12,10 +12,6 @@ beforeEach(clearStore);
 const TOKEN = 'test-session-token';
 const cookies = sessionCookie(TOKEN);
 
-// Products from src/data/products.ts (real data)
-const BROCCOLI = { productId: '1', name: 'บร็อคโคลี่ออร์แกนิค', price: 79, qty: 1 }; // 99 * (1-20%) = 79.2 → 79
-const MILK = { productId: '3', name: 'นมสดโฮลมิลค์ 1L', price: 59, qty: 1 }; // no discount
-
 describe('GET /api/cart', () => {
   it('returns empty cart summary for new guest (no cookie)', async () => {
     const res = await getCart(makeReq('GET', '/api/cart'));

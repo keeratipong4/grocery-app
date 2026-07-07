@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
-import { sessions } from './server-store';
+import { prisma } from './prisma';
+import type { CartItem } from '@/types';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const isValidEmail = (s: string) => EMAIL_RE.test(s);
@@ -31,18 +32,34 @@ export function getToken(req: NextRequest): string | null {
   return req.cookies.get('farmart-session')?.value ?? null;
 }
 
-export function getAuthSession(req: NextRequest) {
+export async function getAuthSession(req: NextRequest) {
   const token = getToken(req);
   if (!token) return null;
-  const session = sessions.get(token);
-  if (!session) return null;
-  return { token, ...session };
+  const session = await prisma.session.findUnique({ where: { token } });
+  if (!session || !session.userId) return null;
+  return { token, userId: session.userId };
 }
 
-export function requireAuth(req: NextRequest):
+export async function requireAuth(req: NextRequest): Promise<
   | { session: null; error: NextResponse }
-  | { session: { token: string; email: string }; error: null } {
-  const session = getAuthSession(req);
+  | { session: { token: string; userId: string }; error: null }
+> {
+  const session = await getAuthSession(req);
   if (!session) return { session: null, error: err('UNAUTHORIZED', 'กรุณาเข้าสู่ระบบก่อน', 401) };
   return { session, error: null };
+}
+
+/** Ensure a Session row exists for a cart token (required by CartItem's FK), without touching an existing user link. */
+export async function ensureCartSession(token: string) {
+  await prisma.session.upsert({ where: { token }, update: {}, create: { token, userId: null } });
+}
+
+export async function getCartItems(token: string): Promise<CartItem[]> {
+  const rows = await prisma.cartItem.findMany({ where: { sessionToken: token } });
+  return rows.map(r => ({ productId: r.productId, name: r.name, price: r.price, qty: r.qty }));
+}
+
+export async function getDiscountRateForToken(token: string): Promise<number> {
+  const session = await prisma.session.findUnique({ where: { token }, include: { user: true } });
+  return session?.user?.isMember ? 15 : 0;
 }

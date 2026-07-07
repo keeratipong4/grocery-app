@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getCart, carts, computeSummary, getDiscountRate } from '@/lib/server-store';
-import { getToken } from '@/lib/api-helpers';
+import { prisma } from '@/lib/prisma';
+import { computeSummary } from '@/lib/server-store';
+import { getCartItems, getDiscountRateForToken, getToken } from '@/lib/api-helpers';
 import { randomUUID } from 'crypto';
 
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const existingToken = getToken(req);
   const token         = existingToken ?? randomUUID();
-  const items         = getCart(token);
-  const summary       = computeSummary(items, getDiscountRate(token));
+  const items         = await getCartItems(token);
+  const summary       = computeSummary(items, await getDiscountRateForToken(token));
 
   const res = NextResponse.json({ data: summary });
   if (!existingToken) {
@@ -17,10 +18,10 @@ export function GET(req: NextRequest) {
   return res;
 }
 
-export function DELETE(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   const existingToken = getToken(req);
   const token         = existingToken ?? randomUUID();
-  carts.set(token, []);
+  await prisma.cartItem.deleteMany({ where: { sessionToken: token } });
 
   const res = NextResponse.json({ data: { success: true } });
   if (!existingToken) {

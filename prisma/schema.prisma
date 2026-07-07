@@ -45,6 +45,39 @@ model CartItem {
   @@unique([sessionToken, productId])
 }
 
+// ── Catalog ───────────────────────────────────────────────────────────────
+model Category {
+  id       String    @id
+  name     String
+  slug     String    @unique
+  icon     String
+  color    String
+  products Product[]
+}
+
+model Product {
+  id          String   @id
+  name        String
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  price       Int
+  discount    Int      @default(0)
+  image       String
+  rating      Float
+  reviewCount Int      @default(0)
+  isNew       Boolean  @default(false)
+
+  @@index([categoryId])
+}
+
+model Brand {
+  id       String @id
+  name     String
+  subtitle String
+  gradient String
+  logo     String
+}
+
 // ── Orders ────────────────────────────────────────────────────────────────
 model Order {
   id                String           @id @default(cuid())

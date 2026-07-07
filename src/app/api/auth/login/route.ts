@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { users, sessions, carts, getCart } from '@/lib/server-store';
+import { prisma } from '@/lib/prisma';
 import { getToken, verifyPassword } from '@/lib/api-helpers';
 import { randomUUID } from 'crypto';
-import type { CartItem } from '@/types';
 
 export async function POST(req: NextRequest) {
   let body: { email?: string; password?: string };
@@ -20,7 +19,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const user = users.get(body.email);
+  const user = await prisma.user.findUnique({ where: { email: body.email } });
   if (!user || !verifyPassword(body.password, user.password)) {
     return NextResponse.json(
       { code: 'INVALID_CREDENTIALS', message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' },
@@ -29,14 +28,20 @@ export async function POST(req: NextRequest) {
   }
 
   // Merge guest cart then issue new token (prevent session fixation)
-  const guestToken            = getToken(req);
-  const guestCart: CartItem[] = guestToken ? getCart(guestToken) : [];
-  const newToken              = randomUUID();
-  sessions.set(newToken, { email: body.email });
-  if (guestCart.length) carts.set(newToken, guestCart);
-  if (guestToken) carts.delete(guestToken);
+  const guestToken     = getToken(req);
+  const guestCartItems = guestToken
+    ? await prisma.cartItem.findMany({ where: { sessionToken: guestToken } })
+    : [];
+  const newToken = randomUUID();
+  await prisma.session.create({ data: { token: newToken, userId: user.id } });
+  if (guestCartItems.length) {
+    await prisma.cartItem.createMany({
+      data: guestCartItems.map(ci => ({ sessionToken: newToken, productId: ci.productId, name: ci.name, price: ci.price, qty: ci.qty })),
+    });
+  }
+  if (guestToken) await prisma.session.deleteMany({ where: { token: guestToken } });
 
-  const res = NextResponse.json({ data: { email: user.email, joinedAt: user.joinedAt } });
+  const res = NextResponse.json({ data: { email: user.email, joinedAt: user.joinedAt.toISOString() } });
   res.cookies.set('farmart-session', newToken, { httpOnly: true, sameSite: 'lax', path: '/' });
   return res;
 }

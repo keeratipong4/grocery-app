@@ -31,7 +31,7 @@ describe('GET /api/products', () => {
     // An unrecognised slug leaves `result` unfiltered.
     const resAll = await getProducts(makeReq('GET', '/api/products?limit=100'));
     const bodyAll = await resAll.json();
-    const res = await getProducts(makeReq('GET', '/api/products?category=nonexistent'));
+    const res = await getProducts(makeReq('GET', '/api/products?category=nonexistent&limit=100'));
     const body = await res.json();
     assert.equal(body.data.length, bodyAll.data.length);
   });

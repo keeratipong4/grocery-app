@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { users, sessions, carts, getCart } from '@/lib/server-store';
+import { prisma } from '@/lib/prisma';
 import { getToken, isValidEmail, hashPassword } from '@/lib/api-helpers';
 import { randomUUID } from 'crypto';
-import type { CartItem } from '@/types';
 
 export async function POST(req: NextRequest) {
   let body: { email?: string; password?: string };
@@ -31,25 +30,32 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (users.has(body.email)) {
+  if (await prisma.user.findUnique({ where: { email: body.email } })) {
     return NextResponse.json(
       { code: 'DUPLICATE_EMAIL', message: 'อีเมลนี้ถูกใช้งานแล้ว' },
       { status: 409 }
     );
   }
 
-  const joinedAt = new Date().toISOString();
-  users.set(body.email, { email: body.email, password: hashPassword(body.password), joinedAt, isMember: false });
+  const user = await prisma.user.create({
+    data: { email: body.email, password: hashPassword(body.password), isMember: false },
+  });
 
   // Merge guest cart into new session
-  const guestToken                = getToken(req);
-  const guestCart: CartItem[]     = guestToken ? getCart(guestToken) : [];
-  const newToken                  = randomUUID();
-  sessions.set(newToken, { email: body.email });
-  if (guestCart.length) carts.set(newToken, guestCart);
-  if (guestToken) carts.delete(guestToken);
+  const guestToken   = getToken(req);
+  const guestCartItems = guestToken
+    ? await prisma.cartItem.findMany({ where: { sessionToken: guestToken } })
+    : [];
+  const newToken = randomUUID();
+  await prisma.session.create({ data: { token: newToken, userId: user.id } });
+  if (guestCartItems.length) {
+    await prisma.cartItem.createMany({
+      data: guestCartItems.map(ci => ({ sessionToken: newToken, productId: ci.productId, name: ci.name, price: ci.price, qty: ci.qty })),
+    });
+  }
+  if (guestToken) await prisma.session.deleteMany({ where: { token: guestToken } });
 
-  const res = NextResponse.json({ data: { email: body.email, joinedAt } }, { status: 201 });
+  const res = NextResponse.json({ data: { email: user.email, joinedAt: user.joinedAt.toISOString() } }, { status: 201 });
   res.cookies.set('farmart-session', newToken, { httpOnly: true, sameSite: 'lax', path: '/' });
   return res;
 }

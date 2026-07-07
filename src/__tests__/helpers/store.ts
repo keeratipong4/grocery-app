@@ -1,8 +1,10 @@
-import { users, sessions, carts, orderStore } from '@/lib/server-store';
+import { prisma } from '@/lib/prisma';
 
-export function clearStore() {
-  users.clear();
-  sessions.clear();
-  carts.clear();
-  orderStore.clear();
+export async function clearStore() {
+  await prisma.cartItem.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.shippingAddress.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.user.deleteMany();
 }

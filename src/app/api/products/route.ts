@@ -1,11 +1,25 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { products } from '@/data/products';
-import { categories } from '@/data/categories';
+import { prisma } from '@/lib/prisma';
 import { calcDiscountedPrice } from '@/lib/utils';
 import type { Product } from '@/types';
 
-export function GET(req: NextRequest) {
+async function loadProducts(): Promise<Product[]> {
+  const rows = await prisma.product.findMany({ include: { category: true } });
+  return rows.map(p => ({
+    id: p.id,
+    name: p.name,
+    category: p.category.name,
+    price: p.price,
+    discount: p.discount,
+    image: p.image,
+    rating: p.rating,
+    reviewCount: p.reviewCount,
+    isNew: p.isNew,
+  }));
+}
+
+export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const category    = searchParams.get('category');
   const q           = searchParams.get('q');
@@ -15,10 +29,11 @@ export function GET(req: NextRequest) {
   const isNewOnly   = searchParams.get('isNew') === 'true';
   const hasDiscount = searchParams.get('hasDiscount') === 'true';
 
+  const products = await loadProducts();
   let result = [...products];
 
   if (category) {
-    const cat = categories.find(c => c.slug === category);
+    const cat = await prisma.category.findUnique({ where: { slug: category } });
     if (cat) result = result.filter(p => p.category === cat.name);
   }
   if (q) {
