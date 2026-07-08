@@ -1,5 +1,6 @@
 import { prisma } from '../src/lib/prisma';
 import { hashPassword } from '../src/lib/api-helpers';
+import { calcDiscountedPrice } from '../src/lib/utils';
 
 const DEMO_PASSWORD = 'Password123!';
 
@@ -100,8 +101,10 @@ async function main() {
     const status = orderStatuses[i];
     const owner = orderOwners[i];
     const id = `ord_seed_${String(i + 1).padStart(2, '0')}`;
+    const p = products[i % products.length];
+    const price = calcDiscountedPrice(p.price, p.discount);
     const items = [
-      { productId: products[i % products.length].id, name: products[i % products.length].name, price: products[i % products.length].price, qty: 1 + (i % 3) },
+      { productId: p.id, name: p.name, price, qty: 1 + (i % 3) },
     ];
     const discountRate = owner.isMember ? 15 : 0;
     const totals = computeOrderTotals(items, discountRate);

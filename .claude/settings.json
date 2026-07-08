@@ -2,7 +2,6 @@
   "permissions": {
     "allow": ["Bash(git status)", "Bash(npm test:*)", "Bash(npm run lint)", "Read", "Grep"],
     "ask": ["Edit", "Write", "Bash(git commit:*)"],
-    "deny": ["Bash(rm -rf)", "Bash(git push)", "Read(.env)", "Read(.//*.pem)"]
+    "deny": ["Bash(rm -rf *)", "Bash(git push *)", "Read(.env)", "Read(.//*.pem)"]
   }
 }
-
