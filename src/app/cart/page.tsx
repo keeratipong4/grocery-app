@@ -7,7 +7,7 @@ import { formatPrice } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
 export default function CartPage() {
-  const { items, removeItem, updateQty, totalPrice } = useCartStore();
+  const { items, removeItem, updateQty, totalPrice, totalItems } = useCartStore();
   const hydrateFromApi = useCartStore(s => s.hydrateFromApi);
   const discountRate = useMemberStore(s => s.discountRate());
   const [mounted, setMounted] = useState(false);
@@ -42,7 +42,12 @@ export default function CartPage() {
           <span className="text-ink font-medium">ตะกร้าสินค้า</span>
         </nav>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">ตะกร้าสินค้าของคุณ</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-2">
+          ตะกร้าสินค้าของคุณ
+          <span className="text-sm bg-danger text-white rounded-full px-2.5 py-0.5">
+            {totalItems()}
+          </span>
+        </h1>
 
         {items.length === 0 ? (
           <div className="bg-white border border-border rounded-banner p-16 text-center shadow-card">

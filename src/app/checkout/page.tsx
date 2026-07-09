@@ -38,6 +38,34 @@ export default function CheckoutPage() {
     setMounted(true);
   }, []);
 
+  const loggedIn = isMember();
+
+  // Pre-populate address if user is logged in
+  useEffect(() => {
+    if (!mounted) return;
+    if (loggedIn) {
+      fetch('/api/auth/me')
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to fetch user info');
+        })
+        .then(resJson => {
+          const addr = resJson.data?.lastShippingAddress;
+          if (addr) {
+            setFullName(addr.name || '');
+            setPhone(addr.phone || '');
+            setAddressLine(addr.addressLine || '');
+            setDistrict(addr.district || '');
+            setProvince(addr.province || '');
+            setPostalCode(addr.postalCode || '');
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching last shipping address:', err);
+        });
+    }
+  }, [mounted, loggedIn]);
+
   if (!mounted) {
     return (
       <main className="min-h-screen bg-surface py-12">

@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file, structured 
 
 ---
 
+## [2026-07-09] — User Profile, Order History & Address Pre-populate
+
+### 🚀 Added
+- **User Profile Page (`/profile`)**:
+  - Created a responsive profile page where logged-in users can edit their email and change their password.
+  - Integrated order history section displaying previous orders with their date, total, status, and direct link to their details.
+  - Integrated a fallback login/register card for unauthenticated guest users.
+- **API Routes**:
+  - **`GET /api/orders`**: New endpoint returning the current user's order history sorted by creation date descending.
+  - **`PUT /api/auth/me`**: New endpoint for updating user account details (email/password) with security validations.
+
+### 🔧 Fixed & Enhanced
+- **Address Pre-populate on Checkout**:
+  - Updated `GET /api/auth/me` to include `lastShippingAddress` fetched from the user's most recent order.
+  - Modified the checkout page to automatically retrieve and populate the shipping address forms if a prior address exists, while keeping fields editable.
+- **Navbar User Dropdown**:
+  - Added a "โปรไฟล์ของฉัน" (My Profile) link inside the user menu dropdown.
+
+### ⚙️ Changed (Dev & Tooling)
+- **Integration Tests**:
+  - Added new tests in `auth.test.ts` to verify profile modifications and address retrieval.
+  - Created `orders-list.test.ts` to test order history fetching.
+  - Updated `package.json` scripts (`test`, `test:coverage`, `test:integration`) to include the new test file.
+
+---
+
 ## [2026-07-09] — Transaction Flow, Link Fixes & Hydration Fixes
 
 ### 🚀 Added (New Pages & Features)
@@ -26,6 +52,17 @@ All notable changes to this project will be documented in this file, structured 
   - Implemented strict server-side cookie ownership check to prevent cross-account order leaking.
 
 ### 🔧 Fixed (Link Integrations & Bugs)
+- **Navbar Category Dropdown**:
+  - Replaced the static, non-functional "หมวดหมู่สินค้า" button with an interactive dropdown displaying all categories, complete with custom icons, hover state animations, and anchor navigation links.
+  - Implemented custom click-outside hook functionality using React `useRef` and `useEffect` to auto-close the dropdown.
+- **Cart Total & Discount Mismatch**:
+  - Integrated `useMemberStore` discount calculation in the Navbar's cart price badge, correcting the subtotal mismatch where member discounts weren't being factored in next to the cart icon.
+- **Cart Item Count Badge Sync**:
+  - Standardized the cart badges across `Navbar.tsx`, `CartDrawer.tsx`, and `/cart` page to display the cumulative quantity of items (`totalItems()`) instead of the count of distinct product types (`items.length`).
+- **Dynamic User Menu Dropdown**:
+  - Refactored the raw plain-text login displays to a premium User Profile Pill showing user avatar initials.
+  - Toggles a custom profile dropdown containing full user information and a red Logout button, along with automated click-outside closure.
+  - Configured anchor scroll link `/#membership-section` to scroll directly down to the signup panel on the Homepage when guests click "เข้าสู่ระบบ".
 - **Link Fixes**:
   - Connected `#` placeholders on Homepage (HeroBanner, Category Grid, Brand Cards, Footer, Section Headers) to actual matching routes.
   - Connected Navbar search bar to route directly to `/search?q=...`.

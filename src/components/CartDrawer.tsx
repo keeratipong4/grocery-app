@@ -7,7 +7,7 @@ import { useMemberStore } from '@/store/useMemberStore';
 import Link from 'next/link';
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, updateQty, totalPrice } = useCartStore();
+  const { items, isOpen, closeCart, removeItem, updateQty, totalPrice, totalItems } = useCartStore();
   const hydrateFromApi = useCartStore(s => s.hydrateFromApi);
   const discountRate   = useMemberStore(s => s.discountRate());
   const [mounted, setMounted] = useState(false);
@@ -42,7 +42,7 @@ export default function CartDrawer() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-lg font-bold flex items-center gap-2">
             ตะกร้าสินค้า
-            <span className="text-sm bg-danger text-white rounded-full px-2 py-0.5">{items.length}</span>
+            <span className="text-sm bg-danger text-white rounded-full px-2 py-0.5">{mounted ? totalItems() : 0}</span>
           </h2>
           <button
             onClick={closeCart}

@@ -20,7 +20,7 @@ export default function MembershipPanel() {
 
   if (mounted && isMember()) {
     return (
-      <aside className="bg-gradient-to-b from-green-900 to-green-800 rounded-banner p-7 text-white">
+      <aside id="membership-section" className="bg-gradient-to-b from-green-900 to-green-800 rounded-banner p-7 text-white">
         <p className="text-2xl mb-2">🎉</p>
         <h3 className="text-xl font-bold mb-1">คุณเป็นสมาชิกแล้ว!</h3>
         <p className="text-sm text-green-200 mb-1">{member?.email}</p>
@@ -72,7 +72,7 @@ export default function MembershipPanel() {
   }
 
   return (
-    <aside className="bg-gradient-to-b from-green-900 to-green-800 rounded-banner p-7 text-white">
+    <aside id="membership-section" className="bg-gradient-to-b from-green-900 to-green-800 rounded-banner p-7 text-white">
       <span className="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
         🎉 สมาชิกเท่านั้น
       </span>

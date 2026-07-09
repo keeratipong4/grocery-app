@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { POST as register } from '@/app/api/auth/register/route';
 import { POST as login } from '@/app/api/auth/login/route';
 import { POST as logout } from '@/app/api/auth/logout/route';
-import { GET as me } from '@/app/api/auth/me/route';
+import { GET as me, PUT as updateMe } from '@/app/api/auth/me/route';
+import { POST as checkout } from '@/app/api/checkout/route';
+import { POST as addItem } from '@/app/api/cart/items/route';
 import { makeReq, getSetCookie, sessionCookie } from '../helpers/request';
 import { clearStore } from '../helpers/store';
 
@@ -202,3 +204,136 @@ describe('POST /api/auth/logout', () => {
     assert.equal(res.status, 200);
   });
 });
+
+describe('PUT /api/auth/me', () => {
+  it('updates email successfully and returns 200', async () => {
+    const token = await registerAndLogin();
+    const res = await updateMe(
+      makeReq('PUT', '/api/auth/me', {
+        body: { email: 'new-email@test.com' },
+        cookies: sessionCookie(token),
+      })
+    );
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.data.email, 'new-email@test.com');
+  });
+
+  it('updates password successfully and verifies login with new password', async () => {
+    const email = 'update-pwd@test.com';
+    const token = await registerAndLogin(email, 'oldpassword123');
+    
+    // Update password
+    const updateRes = await updateMe(
+      makeReq('PUT', '/api/auth/me', {
+        body: { password: 'newpassword123' },
+        cookies: sessionCookie(token),
+      })
+    );
+    assert.equal(updateRes.status, 200);
+
+    // Try logging in with old password (should fail)
+    const oldLoginRes = await login(
+      makeReq('POST', '/api/auth/login', { body: { email, password: 'oldpassword123' } })
+    );
+    assert.equal(oldLoginRes.status, 401);
+
+    // Try logging in with new password (should succeed)
+    const newLoginRes = await login(
+      makeReq('POST', '/api/auth/login', { body: { email, password: 'newpassword123' } })
+    );
+    assert.equal(newLoginRes.status, 200);
+  });
+
+  it('returns 409 for duplicate email', async () => {
+    // Register another user first
+    await registerAndLogin('other@test.com', 'password123');
+
+    // Register primary user
+    const token = await registerAndLogin('primary@test.com', 'password123');
+
+    const res = await updateMe(
+      makeReq('PUT', '/api/auth/me', {
+        body: { email: 'other@test.com' },
+        cookies: sessionCookie(token),
+      })
+    );
+    assert.equal(res.status, 409);
+    const body = await res.json();
+    assert.equal(body.code, 'DUPLICATE_EMAIL');
+  });
+
+  it('returns 400 for invalid email format', async () => {
+    const token = await registerAndLogin();
+    const res = await updateMe(
+      makeReq('PUT', '/api/auth/me', {
+        body: { email: 'invalidemail' },
+        cookies: sessionCookie(token),
+      })
+    );
+    assert.equal(res.status, 400);
+  });
+
+  it('returns 400 for short password', async () => {
+    const token = await registerAndLogin();
+    const res = await updateMe(
+      makeReq('PUT', '/api/auth/me', {
+        body: { password: 'short' },
+        cookies: sessionCookie(token),
+      })
+    );
+    assert.equal(res.status, 400);
+  });
+
+  it('returns 401 when not authenticated', async () => {
+    const res = await updateMe(makeReq('PUT', '/api/auth/me', { body: { email: 'test@test.com' } }));
+    assert.equal(res.status, 401);
+  });
+});
+
+describe('GET /api/auth/me - lastShippingAddress', () => {
+  const SHIPPING_ADDR = {
+    name: 'สมหญิง ใจดี',
+    phone: '0987654321',
+    addressLine: '456 ซอยสุขุมวิท 39',
+    district: 'วัฒนา',
+    province: 'กรุงเทพมหานคร',
+    postalCode: '10110',
+  };
+
+  it('returns lastShippingAddress: null when user has no orders', async () => {
+    const token = await registerAndLogin();
+    const res = await me(makeReq('GET', '/api/auth/me', { cookies: sessionCookie(token) }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.data.lastShippingAddress, null);
+  });
+
+  it('returns correct lastShippingAddress after checkout', async () => {
+    const token = await registerAndLogin();
+
+    // Add product 3 to cart
+    await addItem(
+      makeReq('POST', '/api/cart/items', {
+        body: { productId: '3', qty: 1 },
+        cookies: sessionCookie(token),
+      })
+    );
+
+    // Checkout
+    const checkoutRes = await checkout(
+      makeReq('POST', '/api/checkout', {
+        body: { shippingAddress: SHIPPING_ADDR, paymentMethod: 'cod' },
+        cookies: sessionCookie(token),
+      })
+    );
+    assert.equal(checkoutRes.status, 201);
+
+    // Call GET /api/auth/me and assert lastShippingAddress matches
+    const res = await me(makeReq('GET', '/api/auth/me', { cookies: sessionCookie(token) }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.deepEqual(body.data.lastShippingAddress, SHIPPING_ADDR);
+  });
+});
+
