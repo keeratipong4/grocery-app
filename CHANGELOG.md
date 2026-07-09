@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file, structured 
 
 ---
 
+## [2026-07-09] — Next.js 16 Upgrade & Compatibility Fixes
+
+### 🚀 Upgraded
+- **Next.js & React Upgrade**:
+  - Upgraded Next.js from `14.x` to `^16.0.0` for latest features and performance.
+  - Upgraded React and ReactDOM to `^19.0.0` to match Next.js 16 peer dependencies.
+  - Upgraded ESLint to `^9.0.0` and `eslint-config-next` to `^16.0.0` to resolve dependency conflicts.
+
+### 🔧 Fixed & Enhanced
+- **Next.js 16 Breaking Changes (Asynchronous APIs)**:
+  - Fixed `params` and `searchParams` in Page components and Route Handlers, which are now `Promise`s in Next.js 15+ and must be `await`ed before access.
+  - Fixed `cookies()` from `next/headers` which is now a `Promise` and requires `await`ing.
+  - Affected files included `/product/[id]`, `/search`, `/category/[slug]`, `/orders/[id]`, and multiple API endpoints (`/api/cart/items/[productId]`, `/api/orders/[id]`, `/api/products/[id]`).
+- **Turbopack & Native Modules Compatibility**:
+  - Added `serverExternalPackages: ['better-sqlite3', '@prisma/client']` to `next.config.mjs` to resolve build failures caused by Next.js attempting to bundle C++ native bindings.
+- **Integration Tests Validation**:
+  - Refactored integration tests (`cart.test.ts`, `checkout.test.ts`, `products.test.ts`) to pass `Promise.resolve({ ... })` directly to route handler testing functions, accurately simulating Next.js 16 router behavior.
+
+---
+
 ## [2026-07-09] — User Profile, Order History & Address Pre-populate
 
 ### 🚀 Added

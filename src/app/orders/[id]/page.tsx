@@ -5,15 +5,18 @@ import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
-  return { title: `คำสั่งซื้อ #${params.id} | Farmart` };
+  const { id } = await params;
+  return { title: `คำสั่งซื้อ #${id} | Farmart` };
 }
 
 export default async function OrderDetailPage({ params }: Props) {
-  const token = cookies().get('farmart-session')?.value;
+  const { id } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('farmart-session')?.value;
   if (!token) {
     redirect('/');
   }
@@ -27,7 +30,7 @@ export default async function OrderDetailPage({ params }: Props) {
   }
 
   const order = await prisma.order.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       items: true,
       shippingAddress: true,

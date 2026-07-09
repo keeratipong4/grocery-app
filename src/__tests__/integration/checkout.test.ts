@@ -178,7 +178,7 @@ describe('POST /api/checkout', () => {
 
 describe('GET /api/orders/:id', () => {
   it('returns 401 when not authenticated', async () => {
-    const res = await getOrder(makeReq('GET', '/api/orders/ord_123'), { params: { id: 'ord_123' } });
+    const res = await getOrder(makeReq('GET', '/api/orders/ord_123'), { params: Promise.resolve({ id: 'ord_123' }) });
     assert.equal(res.status, 401);
   });
 
@@ -186,7 +186,7 @@ describe('GET /api/orders/:id', () => {
     const token = await loginUser(USER_A);
     const res = await getOrder(
       makeReq('GET', '/api/orders/ord_nonexistent', { cookies: sessionCookie(token) }),
-      { params: { id: 'ord_nonexistent' } }
+      { params: Promise.resolve({ id: 'ord_nonexistent' }) }
     );
     assert.equal(res.status, 404);
     const body = await res.json();
@@ -206,7 +206,7 @@ describe('GET /api/orders/:id', () => {
 
     const res = await getOrder(
       makeReq('GET', `/api/orders/${orderId}`, { cookies: sessionCookie(token) }),
-      { params: { id: orderId } }
+      { params: Promise.resolve({ id: orderId }) }
     );
     assert.equal(res.status, 200);
     const body = await res.json();
@@ -228,7 +228,7 @@ describe('GET /api/orders/:id', () => {
     const tokenB = await loginUser(USER_B);
     const res = await getOrder(
       makeReq('GET', `/api/orders/${orderId}`, { cookies: sessionCookie(tokenB) }),
-      { params: { id: orderId } }
+      { params: Promise.resolve({ id: orderId }) }
     );
     assert.equal(res.status, 403);
     const body = await res.json();

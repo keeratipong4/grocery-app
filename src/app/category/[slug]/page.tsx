@@ -6,25 +6,27 @@ import ProductCard from '@/components/ProductCard';
 import SectionHeader from '@/components/SectionHeader';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export function generateStaticParams() {
   return categories.map(cat => ({ slug: cat.slug }));
 }
 
-export function generateMetadata({ params }: Props) {
-  const category = categories.find(c => c.slug === params.slug);
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
+  const category = categories.find(c => c.slug === slug);
   if (!category) return {};
   return { title: `${category.name} | Farmart` };
 }
 
-export default function CategoryPage({ params }: Props) {
-  const category = categories.find(c => c.slug === params.slug);
+export default async function CategoryPage({ params }: Props) {
+  const { slug } = await params;
+  const category = categories.find(c => c.slug === slug);
   if (!category) notFound();
 
   const categoryProducts = products.filter(p => p.category === category.name);
-  const otherCategories = categories.filter(c => c.slug !== params.slug);
+  const otherCategories = categories.filter(c => c.slug !== slug);
 
   return (
     <>

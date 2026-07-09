@@ -6,14 +6,14 @@ import Link from 'next/link';
 import type { Product } from '@/types';
 
 interface Props {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     category?: string;
     sort?: string;
     isNew?: string;
     hasDiscount?: string;
     page?: string;
-  };
+  }>;
 }
 
 export const metadata = {
@@ -22,18 +22,19 @@ export const metadata = {
 };
 
 export default async function SearchPage({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams;
   // 1. Fetch categories for the sidebar selection
   const categories = await prisma.category.findMany({
     orderBy: { name: 'asc' },
   });
 
   // 2. Parse search parameters
-  const q = searchParams.q || '';
-  const categorySlug = searchParams.category || '';
-  const sort = searchParams.sort || 'newest';
-  const isNewOnly = searchParams.isNew === 'true';
-  const hasDiscount = searchParams.hasDiscount === 'true';
-  const page = Math.max(1, Number(searchParams.page || '1'));
+  const q = resolvedSearchParams.q || '';
+  const categorySlug = resolvedSearchParams.category || '';
+  const sort = resolvedSearchParams.sort || 'newest';
+  const isNewOnly = resolvedSearchParams.isNew === 'true';
+  const hasDiscount = resolvedSearchParams.hasDiscount === 'true';
+  const page = Math.max(1, Number(resolvedSearchParams.page || '1'));
   const limit = 16; // 16 items per page (fits 2, 3, or 4 columns grid nicely)
 
   // 3. Find Category ID if category filter is active
@@ -93,7 +94,7 @@ export default async function SearchPage({ searchParams }: Props) {
   // Helper to build page link
   function getPageLink(pageNum: number) {
     const params = new URLSearchParams();
-    Object.entries(searchParams).forEach(([key, val]) => {
+    Object.entries(resolvedSearchParams).forEach(([key, val]) => {
       if (val && key !== 'page') params.set(key, val);
     });
     params.set('page', String(pageNum));
@@ -103,7 +104,7 @@ export default async function SearchPage({ searchParams }: Props) {
   // Helper to build category filter link
   function getCategoryFilterLink(slug: string | null) {
     const params = new URLSearchParams();
-    Object.entries(searchParams).forEach(([key, val]) => {
+    Object.entries(resolvedSearchParams).forEach(([key, val]) => {
       if (val && key !== 'category' && key !== 'page') params.set(key, val);
     });
     if (slug) params.set('category', slug);

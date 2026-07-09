@@ -13,7 +13,7 @@ An online grocery store where customers can search and buy groceries (vegetables
 
 **Business Goals:** Increase sales · Retain members (repeat purchases) · Reduce in-store workload
 
-> **Note:** this project started as a frontend-only build with mock data (see `plan.md`), then grew a real Prisma/SQLite backend for auth, cart, checkout, orders, and the product/category catalog. The sections below describe the *current* state, including where the migration is incomplete.
+> **Note:** this project started as a frontend-only build with mock data (see `PRD.md`), then grew a real Prisma/SQLite backend for auth, cart, checkout, orders, and the product/category catalog. The sections below describe the *current* state, including where the migration is incomplete.
 
 ---
 
@@ -29,7 +29,7 @@ An online grocery store where customers can search and buy groceries (vegetables
 
 ---
 
-## What to Build (see plan.md for full checklist)
+## What to Build (see PRD.md for feature scope)
 
 | Step | What to Build | Path |
 |---|---|---|
@@ -138,6 +138,14 @@ npx prisma generate   # After pulling schema changes without a migration (e.g. f
 
 ---
 
+## Documentation
+
+- **`PRD.md`**: Product Requirements Document. Defines the business goals, user stories, target audience, and feature scope. Read this to understand the "What" and "Why" of the features you are building.
+- **`CHANGELOG.md`**: Tracks all notable changes, features, and fixes in the project. Whenever you complete a significant task or session, summarize your work and append it here following the existing date-based format.
+- **`DECISIONS.md`**: Architecture Decision Records (ADR). Contains the historical context and rationale behind major technical choices (e.g. why we use `better-sqlite3`, or why we upgraded to Next.js 16). Read this to understand the project's technical direction, and propose additions to it when making new architectural decisions.
+
+---
+
 ## Do Not Touch
 
 - **`CLAUDE.md`** — points to this file. Do not modify unless explicitly asked.
@@ -163,12 +171,13 @@ npx prisma generate   # After pulling schema changes without a migration (e.g. f
 
 ## Before Every Commit
 
-1. `npm run build` — zero errors
-2. `npm run lint` — zero warnings
-3. `npm test` — all tests passing; reseed with `npm run db:seed` afterward if you need demo data restored
-4. If a new feature was added, write unit tests for it and run `npm run test:coverage` — must pass with overall coverage above 80%
-5. Open the changed page in browser and verify visually (`npm run dev` — check the terminal for the actual port, 3000 may be in use)
-6. Test at 375px viewport (mobile) if any UI was changed
-7. Confirm `DiscountBadge` only appears when `discount > 0`
-8. Confirm cart badge in Navbar reflects the correct item count
-9. Test every new component at 375px viewport width (mobile).
+1. **Update Documentation:** ALWAYS update `CHANGELOG.md`, `DECISIONS.md`, and/or `PRD.md` as appropriate for your changes BEFORE committing your work.
+2. `npm run build` — zero errors
+3. `npm run lint` — zero warnings
+4. `npm test` — all tests passing; reseed with `npm run db:seed` afterward if you need demo data restored
+5. If a new feature was added, write unit tests for it and run `npm run test:coverage` — must pass with overall coverage above 80%
+6. Open the changed page in browser and verify visually (`npm run dev` — check the terminal for the actual port, 3000 may be in use)
+7. Test at 375px viewport (mobile) if any UI was changed
+8. Confirm `DiscountBadge` only appears when `discount > 0`
+9. Confirm cart badge in Navbar reflects the correct item count
+10. Test every new component at 375px viewport width (mobile).

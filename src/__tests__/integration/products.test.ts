@@ -155,7 +155,7 @@ describe('GET /api/products', () => {
 describe('GET /api/products/:id', () => {
   it('returns product for valid id', async () => {
     const res = await getProduct(new Request('http://localhost:3000/api/products/1'), {
-      params: { id: '1' },
+      params: Promise.resolve({ id: '1' }),
     });
     assert.equal(res.status, 200);
     const body = await res.json();
@@ -165,7 +165,7 @@ describe('GET /api/products/:id', () => {
 
   it('returns product with all expected fields', async () => {
     const res = await getProduct(new Request('http://localhost:3000/api/products/3'), {
-      params: { id: '3' },
+      params: Promise.resolve({ id: '3' }),
     });
     const body = await res.json();
     const p = body.data;
@@ -180,7 +180,7 @@ describe('GET /api/products/:id', () => {
 
   it('returns 404 for unknown id', async () => {
     const res = await getProduct(new Request('http://localhost:3000/api/products/999'), {
-      params: { id: '999' },
+      params: Promise.resolve({ id: '999' }),
     });
     assert.equal(res.status, 404);
     const body = await res.json();

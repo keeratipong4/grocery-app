@@ -151,7 +151,7 @@ describe('PATCH /api/cart/items/:productId', () => {
     await addItem(makeReq('POST', '/api/cart/items', { body: { productId: '1' }, cookies }));
     const res = await updateItem(
       makeReq('PATCH', '/api/cart/items/1', { body: { qty: 5 }, cookies }),
-      { params: { productId: '1' } }
+      { params: Promise.resolve({ productId: '1' }) }
     );
     assert.equal(res.status, 200);
     const body = await res.json();
@@ -162,7 +162,7 @@ describe('PATCH /api/cart/items/:productId', () => {
     await addItem(makeReq('POST', '/api/cart/items', { body: { productId: '1' }, cookies }));
     const res = await updateItem(
       makeReq('PATCH', '/api/cart/items/1', { body: { qty: 0 }, cookies }),
-      { params: { productId: '1' } }
+      { params: Promise.resolve({ productId: '1' }) }
     );
     const body = await res.json();
     assert.equal(body.data.items.length, 0);
@@ -171,7 +171,7 @@ describe('PATCH /api/cart/items/:productId', () => {
   it('returns 401 when no session cookie', async () => {
     const res = await updateItem(
       makeReq('PATCH', '/api/cart/items/1', { body: { qty: 2 } }),
-      { params: { productId: '1' } }
+      { params: Promise.resolve({ productId: '1' }) }
     );
     assert.equal(res.status, 401);
     const body = await res.json();
@@ -185,7 +185,7 @@ describe('DELETE /api/cart/items/:productId', () => {
     await addItem(makeReq('POST', '/api/cart/items', { body: { productId: '3' }, cookies }));
     const res = await removeItem(
       makeReq('DELETE', '/api/cart/items/1', { cookies }),
-      { params: { productId: '1' } }
+      { params: Promise.resolve({ productId: '1' }) }
     );
     assert.equal(res.status, 200);
     const body = await res.json();
@@ -196,7 +196,7 @@ describe('DELETE /api/cart/items/:productId', () => {
   it('returns 401 when no session cookie', async () => {
     const res = await removeItem(
       makeReq('DELETE', '/api/cart/items/1'),
-      { params: { productId: '1' } }
+      { params: Promise.resolve({ productId: '1' }) }
     );
     assert.equal(res.status, 401);
   });
@@ -204,7 +204,7 @@ describe('DELETE /api/cart/items/:productId', () => {
   it('succeeds even if item does not exist in cart', async () => {
     const res = await removeItem(
       makeReq('DELETE', '/api/cart/items/999', { cookies }),
-      { params: { productId: '999' } }
+      { params: Promise.resolve({ productId: '999' }) }
     );
     assert.equal(res.status, 200);
   });

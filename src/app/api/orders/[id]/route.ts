@@ -3,14 +3,15 @@ import type { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/api-helpers';
 import { prisma } from '@/lib/prisma';
 
-interface Props { params: { id: string } }
+interface Props { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Props) {
+  const { id } = await params;
   const { session, error } = await requireAuth(req);
   if (error) return error;
 
   const order = await prisma.order.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { items: true, shippingAddress: true, user: true },
   });
   if (!order) {
