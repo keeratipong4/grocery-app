@@ -1,7 +1,8 @@
 'use client'; // form submission updates useMemberStore and calls auth API
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMemberStore } from '@/store/useMemberStore';
+import Link from 'next/link';
 
 export default function MembershipPanel() {
   const { isMember, join, member } = useMemberStore();
@@ -11,8 +12,13 @@ export default function MembershipPanel() {
   const [apiError,    setApiError]   = useState('');
   const [success,     setSuccess]    = useState(false);
   const [isReturning, setIsReturning] = useState(false);
+  const [mounted,     setMounted]    = useState(false);
 
-  if (isMember()) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (mounted && isMember()) {
     return (
       <aside className="bg-gradient-to-b from-green-900 to-green-800 rounded-banner p-7 text-white">
         <p className="text-2xl mb-2">🎉</p>
@@ -113,8 +119,8 @@ export default function MembershipPanel() {
 
       <p className="text-[11px] text-green-300/60 mt-4 text-center">
         การสมัครถือว่ายอมรับ{' '}
-        <a href="#" className="underline text-green-300/80">เงื่อนไข</a> และ{' '}
-        <a href="#" className="underline text-green-300/80">นโยบายความเป็นส่วนตัว</a>
+        <Link href="/terms" className="underline text-green-300/80">เงื่อนไข</Link> และ{' '}
+        <Link href="/privacy" className="underline text-green-300/80">นโยบายความเป็นส่วนตัว</Link>
       </p>
     </aside>
   );

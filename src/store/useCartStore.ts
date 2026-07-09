@@ -105,6 +105,9 @@ export const useCartStore = create<CartStore>()(
       totalItems: () => get().items.reduce((s, i) => s + i.qty, 0),
       totalPrice: () => get().items.reduce((s, i) => s + i.price * i.qty, 0),
     }),
-    { name: 'farmart-cart' }
+    {
+      name: 'farmart-cart',
+      partialize: (state) => ({ items: state.items }),
+    }
   )
 );

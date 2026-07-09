@@ -7,6 +7,7 @@ import MembershipPanel from '@/components/MembershipPanel';
 import SectionHeader from '@/components/SectionHeader';
 import { categories, brands } from '@/data/categories';
 import { topSaverProducts, bestSellerProducts, justLandingProducts } from '@/data/products';
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -16,7 +17,7 @@ export default function HomePage() {
       {/* Browse By Category */}
       <section className="py-16 bg-white">
         <div className="max-w-[1280px] mx-auto px-6">
-          <SectionHeader title="เลือกซื้อตามหมวดหมู่" href="#" />
+          <SectionHeader title="เลือกซื้อตามหมวดหมู่" href="/search" />
           <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-4">
             {categories.map(cat => (
               <CategoryCard key={cat.id} category={cat} />
@@ -28,7 +29,7 @@ export default function HomePage() {
       {/* Featured Brands */}
       <section className="py-16 bg-muted">
         <div className="max-w-[1280px] mx-auto px-6">
-          <SectionHeader title="แบรนด์แนะนำ" href="#" />
+          <SectionHeader title="แบรนด์แนะนำ" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {brands.map(brand => (
               <BrandCard key={brand.id} brand={brand} />
@@ -40,7 +41,7 @@ export default function HomePage() {
       {/* Top Saver Today */}
       <section className="py-16 bg-white">
         <div className="max-w-[1280px] mx-auto px-6">
-          <SectionHeader title="สินค้าราคาพิเศษวันนี้" href="#" />
+          <SectionHeader title="สินค้าราคาพิเศษวันนี้" href="/search?hasDiscount=true" />
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 items-start">
             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-5">
               {topSaverProducts.map((product, i) => (
@@ -55,7 +56,7 @@ export default function HomePage() {
       {/* Best Seller */}
       <section className="py-16 bg-muted">
         <div className="max-w-[1280px] mx-auto px-6">
-          <SectionHeader title="สินค้าขายดี" href="#" />
+          <SectionHeader title="สินค้าขายดี" href="/search?sort=rating_desc" />
           <ProductRow products={bestSellerProducts} />
         </div>
       </section>
@@ -63,7 +64,7 @@ export default function HomePage() {
       {/* Just Landing */}
       <section className="py-16 bg-white">
         <div className="max-w-[1280px] mx-auto px-6">
-          <SectionHeader title="สินค้าใหม่มาใหม่" href="#" />
+          <SectionHeader title="สินค้าใหม่มาใหม่" href="/search?isNew=true" />
           <ProductRow products={justLandingProducts} />
         </div>
       </section>
@@ -83,24 +84,51 @@ export default function HomePage() {
           <div>
             <h4 className="text-white font-semibold mb-4">บริษัท</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              {['เกี่ยวกับเรา', 'ร่วมงานกับเรา', 'ข่าวสาร', 'บล็อก'].map(l => (
-                <li key={l}><a href="#" className="hover:text-primary transition-colors">{l}</a></li>
+              {[
+                { label: 'เกี่ยวกับเรา', href: '/about' },
+                { label: 'ร่วมงานกับเรา', href: '/careers' },
+                { label: 'ข่าวสาร', href: '/news' },
+                { label: 'บล็อก', href: '/blog' }
+              ].map(link => (
+                <li key={link.label}>
+                  <Link href={link.href} className="hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
           <div>
             <h4 className="text-white font-semibold mb-4">ช่วยเหลือ</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              {['ศูนย์ช่วยเหลือ', 'ติดตามออเดอร์', 'คืนสินค้า', 'ติดต่อเรา'].map(l => (
-                <li key={l}><a href="#" className="hover:text-primary transition-colors">{l}</a></li>
+              {[
+                { label: 'ศูนย์ช่วยเหลือ', href: '/help' },
+                { label: 'ติดตามออเดอร์', href: '/orders' },
+                { label: 'คืนสินค้า', href: '/returns' },
+                { label: 'ติดต่อเรา', href: '/contact' }
+              ].map(link => (
+                <li key={link.label}>
+                  <Link href={link.href} className="hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
           <div>
             <h4 className="text-white font-semibold mb-4">ช้อปปิ้ง</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              {['ผัก', 'ผลไม้', 'นม & ไข่', 'เนื้อสัตว์ & อาหารทะเล'].map(l => (
-                <li key={l}><a href="#" className="hover:text-primary transition-colors">{l}</a></li>
+              {[
+                { label: 'ผัก', href: '/category/vegetables' },
+                { label: 'ผลไม้', href: '/category/fruits' },
+                { label: 'นม & ไข่', href: '/category/dairy' },
+                { label: 'เนื้อสัตว์ & อาหารทะเล', href: '/category/meat' }
+              ].map(link => (
+                <li key={link.label}>
+                  <Link href={link.href} className="hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>

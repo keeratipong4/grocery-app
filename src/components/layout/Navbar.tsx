@@ -1,13 +1,13 @@
 'use client'; // reads cart badge from useCartStore, toggles mobile menu
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
 
 const NAV_LINKS = [
-  { label: 'โปรโมชั่น',     href: '#' },
-  { label: "ดีลวันนี้ 🔥",   href: '#', highlight: true },
+  { label: 'โปรโมชั่น',     href: '/search?hasDiscount=true' },
+  { label: "ดีลวันนี้ 🔥",   href: '/search?hasDiscount=true&sort=discount_desc', highlight: true },
   { label: 'ผัก & ผลไม้',   href: '/category/vegetables' },
   { label: 'เนื้อสัตว์',    href: '/category/meat' },
   { label: 'แช่แข็ง',        href: '/category/frozen' },
@@ -18,10 +18,16 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { totalItems, totalPrice, openCart } = useCartStore();
 
-  const count = totalItems();
-  const total = totalPrice();
+  const count = mounted ? totalItems() : 0;
+  const total = mounted ? totalPrice() : 0;
 
   return (
     <header className="sticky top-0 z-30 shadow-card">
@@ -37,16 +43,24 @@ export default function Navbar() {
           </Link>
 
           {/* Search */}
-          <form className="flex-1 flex items-center border border-border rounded-md overflow-hidden h-[42px] max-w-[600px] focus-within:border-primary transition-colors" onSubmit={e => e.preventDefault()}>
-            <select className="h-full px-3 border-r border-border bg-surface text-sm text-text-secondary outline-none flex-shrink-0">
-              <option>ทุกหมวด</option>
-              <option>ผัก</option>
-              <option>ผลไม้</option>
-              <option>นม & ไข่</option>
-              <option>เนื้อสัตว์</option>
+          <form
+            action="/search"
+            method="GET"
+            className="flex-1 flex items-center border border-border rounded-md overflow-hidden h-[42px] max-w-[600px] focus-within:border-primary transition-colors"
+          >
+            <select
+              name="category"
+              className="h-full px-3 border-r border-border bg-surface text-sm text-text-secondary outline-none flex-shrink-0 cursor-pointer"
+            >
+              <option value="">ทุกหมวด</option>
+              <option value="vegetables">ผัก</option>
+              <option value="fruits">ผลไม้</option>
+              <option value="dairy">นม & ไข่</option>
+              <option value="meat">เนื้อสัตว์</option>
             </select>
             <input
               type="search"
+              name="q"
               placeholder="ค้นหาสินค้า แบรนด์…"
               className="flex-1 h-full px-4 text-sm outline-none bg-transparent"
             />

@@ -23,7 +23,7 @@ An online grocery store where customers can search and buy groceries (vegetables
 - **API routes** (`src/app/api/**/route.ts`) are all Prisma-backed: `auth/{register,login,logout,me}`, `cart`, `cart/items`, `cart/items/[productId]`, `checkout`, `orders/[id]`, `membership`, `membership/join`, `products`, `products/[id]`, `search`, `categories`, plus `items` (smoke test) and `hello`. None of them read `src/data/*.ts` or write to `src/lib/server-store.ts`'s in-memory Maps.
 - **`src/lib/server-store.ts` is legacy** — its Maps (`users`/`sessions`/`carts`/`orderStore`) are no longer used by any live route. It's kept only because `src/__tests__/unit/server-store.test.ts` exercises its pure functions directly, and the live cart/checkout routes reuse its storage-agnostic `computeSummary()` helper (and the `ShippingAddress` type). Don't add new Map-based logic here.
 - **Known incomplete migration**: `src/app/page.tsx` (home) and `src/app/category/[slug]/page.tsx` still read `src/data/products.ts` / `src/data/categories.ts` directly via static import — they have **not** been switched to call `/api/products` / `/api/categories`, even though those Prisma-backed endpoints exist and work. Treat `src/data/*.ts` as still-live for these two pages, not dead code.
-- **Missing pages**: there are currently no `src/app/product/[id]`, `src/app/cart`, `src/app/search`, or `src/app/checkout` page routes, despite the matching API routes (`/api/products/[id]`, `/api/cart`, `/api/search`, `/api/checkout`) already existing and working. If asked to build these pages, wire them to the existing API routes rather than to `src/data/*.ts`.
+- **Completed pages**: all transactional page routes (`src/app/product/[id]`, `src/app/cart`, `src/app/search`, and `src/app/checkout`) have been built and wired to the matching Prisma-backed API routes.
 - **Cart/member client state is duplicated by design**: `useCartStore`/`useMemberStore` (Zustand, `persist`) hold an optimistic local copy for snappy UI, but the source of truth is the server (`CartItem`/`User.isMember` in Prisma, keyed by the `farmart-session` cookie). Store mutations do a local update immediately, then fire the matching API call and reconcile. Don't assume Zustand state alone reflects reality — the server can differ (e.g. after login-time cart merge).
 - **Seeding**: use the `/seed-data` skill (`.claude/skills/seed-data/SKILL.md`) to seed/reseed the database. Running `npm test` wipes `User`/`Session`/`CartItem`/`Order`/`OrderItem`/`ShippingAddress` (not `Category`/`Product`/`Brand`) as part of test isolation — reseed afterward if you need demo data for manual browsing.
 
@@ -39,7 +39,7 @@ An online grocery store where customers can search and buy groceries (vegetables
 | 4 | Utilities | `src/lib/utils.ts` |
 | 5 | Layout | `src/app/layout.tsx`, `src/components/layout/Navbar.tsx` |
 | 6 | Components | `ProductCard`, `CartDrawer`, `MembershipPanel`, `NewBadge` |
-| 7 | Pages | `/` ✅, `/category/[slug]` ✅, `/product/[id]` ❌ not built, `/cart` ❌ not built, `/search` ❌ not built, `/checkout` ❌ not built (API routes for all of these already exist) |
+| 7 | Pages | `/` ✅, `/category/[slug]` ✅, `/product/[id]` ✅, `/cart` ✅, `/search` ✅, `/checkout` ✅ |
 
 ---
 
@@ -55,7 +55,7 @@ npm run dev          # Start dev server (http://localhost:3000, or next free por
 npm run build        # Production build — must pass before any commit (includes lint + type check)
 ```
 
-> There is currently no standalone `type-check` script — `npm run build` is what actually type-checks (via Next's build-time `tsc`). If you add one, use `tsc --noEmit`.
+> A standalone type check script is available via `npm run type-check` (runs `tsc --noEmit` to verify type safety without writing dev server build files).
 
 ### Lint
 ```bash
@@ -140,7 +140,6 @@ npx prisma generate   # After pulling schema changes without a migration (e.g. f
 
 ## Do Not Touch
 
-- **`plan.md`** — requirement checklist owned by the human. Agents must not edit it.
 - **`CLAUDE.md`** — points to this file. Do not modify unless explicitly asked.
 - **`AGENTS.md`** — this file. Do not modify unless explicitly asked.
 - **`.claude/settings.json`** — permission config. Never edit.

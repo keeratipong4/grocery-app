@@ -1,17 +1,20 @@
 'use client'; // reads/writes useCartStore, controls drawer visibility
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
 import { useMemberStore } from '@/store/useMemberStore';
+import Link from 'next/link';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, totalPrice } = useCartStore();
   const hydrateFromApi = useCartStore(s => s.hydrateFromApi);
   const discountRate   = useMemberStore(s => s.discountRate());
+  const [mounted, setMounted] = useState(false);
 
   // Pull server cart once on mount (e.g. after a page reload post-login)
   useEffect(() => {
+    setMounted(true);
     hydrateFromApi();
   }, [hydrateFromApi]);
 
@@ -52,7 +55,7 @@ export default function CartDrawer() {
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {items.length === 0 ? (
+          {!mounted || items.length === 0 ? (
             <p className="text-center text-text-secondary pt-10 text-sm">ตะกร้าของคุณว่างเปล่า</p>
           ) : (
             <ul className="flex flex-col gap-3">
@@ -92,24 +95,27 @@ export default function CartDrawer() {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-border">
-          {discountRate > 0 && (
-            <div className="flex justify-between text-sm text-success mb-1">
-              <span>ส่วนลดสมาชิก {discountRate}%</span>
-              <span>-{formatPrice(discount)}</span>
+        {mounted && items.length > 0 && (
+          <div className="px-5 py-4 border-t border-border">
+            {discountRate > 0 && (
+              <div className="flex justify-between text-sm text-success mb-1">
+                <span>ส่วนลดสมาชิก {discountRate}%</span>
+                <span>-{formatPrice(discount)}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-base font-semibold">รวมทั้งหมด</span>
+              <strong className="text-xl font-bold">{formatPrice(grandTotal)}</strong>
             </div>
-          )}
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-base font-semibold">รวมทั้งหมด</span>
-            <strong className="text-xl font-bold">{formatPrice(grandTotal)}</strong>
+            <Link
+              href="/checkout"
+              onClick={closeCart}
+              className="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition-colors"
+            >
+              ชำระเงิน
+            </Link>
           </div>
-          <a
-            href="/checkout"
-            className="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition-colors"
-          >
-            ชำระเงิน
-          </a>
-        </div>
+        )}
       </aside>
     </>
   );

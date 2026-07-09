@@ -236,7 +236,7 @@ describe('GET /api/search', () => {
 
 describe('GET /api/categories', () => {
   it('returns categories list', async () => {
-    const res = await getCategories(makeReq('GET', '/api/categories'));
+    const res = await getCategories();
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.ok(Array.isArray(body.data));

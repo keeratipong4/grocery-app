@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function HeroBanner() {
   return (
     <section className="bg-surface py-6">
@@ -20,12 +22,12 @@ export default function HeroBanner() {
               <p className="text-gray-600 mb-6">
                 ประหยัดสูงสุด <strong>50%</strong> สำหรับออเดอร์แรกของคุณ
               </p>
-              <a
-                href="#"
+              <Link
+                href="/search?hasDiscount=true"
                 className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 rounded-md transition-colors"
               >
                 ช้อปเลย →
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -40,7 +42,7 @@ export default function HeroBanner() {
                   <small className="text-xs font-normal text-gray-500">คอลเลกชันพิเศษ</small>
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">เริ่มต้น <strong className="text-gray-900">฿39</strong></p>
-                <a href="#" className="text-xs font-semibold text-primary mt-2 block hover:underline">ช้อปเลย →</a>
+                <Link href="/category/fruits" className="text-xs font-semibold text-primary mt-2 block hover:underline">ช้อปเลย →</Link>
               </div>
             </div>
             <div className="relative flex-1 bg-gradient-to-br from-blue-100 to-sky-200 rounded-banner flex items-center px-6 py-6 overflow-hidden">
@@ -52,7 +54,7 @@ export default function HeroBanner() {
                   <small className="text-xs font-normal text-gray-500">สดจากฟาร์ม</small>
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">เริ่มต้น <strong className="text-gray-900">฿49</strong></p>
-                <a href="#" className="text-xs font-semibold text-primary mt-2 block hover:underline">ช้อปเลย →</a>
+                <Link href="/category/dairy" className="text-xs font-semibold text-primary mt-2 block hover:underline">ช้อปเลย →</Link>
               </div>
             </div>
           </div>

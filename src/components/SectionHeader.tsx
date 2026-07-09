@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 interface Props {
   title: string;
   href?: string;
@@ -10,9 +12,9 @@ export default function SectionHeader({ title, href, right }: Props) {
       <h2 className="text-xl font-bold text-gray-900">{title}</h2>
       {right ?? (
         href && (
-          <a href={href} className="text-sm font-semibold text-primary hover:underline whitespace-nowrap">
+          <Link href={href} className="text-sm font-semibold text-primary hover:underline whitespace-nowrap">
             ดูทั้งหมด →
-          </a>
+          </Link>
         )
       )}
     </div>
