@@ -64,7 +64,17 @@ export default function Navbar() {
         <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center gap-6">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            href="/"
+            onClick={(e) => {
+              if (typeof window !== 'undefined' && window.location.pathname === '/') {
+                e.preventDefault();
+                window.history.pushState("", document.title, "/");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="flex items-center gap-2 flex-shrink-0"
+          >
             <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">F</span>
             <span className="text-xl font-bold text-gray-900 tracking-tight">farmart</span>
           </Link>
@@ -169,7 +179,7 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                href="/#membership-section"
+                href="/profile"
                 className="hidden sm:flex items-center gap-1.5 text-sm text-gray-700 hover:text-primary transition-colors font-medium px-3 py-2 rounded-md hover:bg-surface"
               >
                 <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">

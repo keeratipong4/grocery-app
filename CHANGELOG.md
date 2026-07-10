@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file, structured 
 
 ---
 
-## [2026-07-10] — Cart Badge & Self-healing Cart Quantity Fix
+## [2026-07-10] — Cart Badge, Self-healing Cart Quantity, and Navbar Navigation Fixes
 
 ### 🔧 Fixed & Enhanced
+- **Navbar Navigation**:
+  - Fixed the logo link in the Navbar to correctly navigate to the homepage (`/`) and clear the URL hash (e.g., `#membership-section`) if the user is already on the homepage.
+  - Updated the guest "เข้าสู่ระบบ" (Login) button in the Navbar to link directly to `/profile` (the Login/Register page) instead of pointing to `/#membership-section`, which prevents double-hash issues.
 - **Hydration Mismatch Fix**:
   - Added `suppressHydrationWarning` to the `<html>` tag in the root layout (`src/app/layout.tsx`). This suppresses console hydration errors/warnings caused by browser extensions (e.g. ColorZilla adding `cz-shortcut-listen="true"`) modifying attributes of the `<body>` or `<html>` elements on the client side.
 - **Cart & Navbar Badge Count**:
