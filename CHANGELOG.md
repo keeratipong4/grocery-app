@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file, structured 
 - **Cart Quantity Update Self-Healing (`PATCH`)**:
   - Modified the `/api/cart/items/[productId]` route handler to perform a database `upsert` instead of a plain `updateMany`.
   - This prevents the cart from becoming empty when clicking "+" or "-" in cases where the database session was cleared (e.g., after test runs) but the client still retained items in local storage.
+- **Checkout Page Session Expiration Recovery**:
+  - Handled 401 Unauthorized errors in the `/api/auth/me` call on the checkout page. If the server session is missing/expired, the client-side session is cleared gracefully using `leave()`, redirecting the user to the login/register card instead of crashing the page.
 
 ---
 

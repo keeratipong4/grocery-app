@@ -10,7 +10,7 @@ import { formatPrice } from '@/lib/utils';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCartStore();
-  const { member, join, isMember, discountRate } = useMemberStore();
+  const { member, join, leave, isMember, discountRate } = useMemberStore();
 
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,10 +46,17 @@ export default function CheckoutPage() {
     if (loggedIn) {
       fetch('/api/auth/me')
         .then(res => {
-          if (res.ok) return res.json();
-          throw new Error('Failed to fetch user info');
+          if (res.status === 401) {
+            leave(); // Session expired on server, clear client state
+            return null;
+          }
+          if (!res.ok) {
+            throw new Error('Failed to fetch user info');
+          }
+          return res.json();
         })
         .then(resJson => {
+          if (!resJson) return;
           const addr = resJson.data?.lastShippingAddress;
           if (addr) {
             setFullName(addr.name || '');
@@ -64,7 +71,7 @@ export default function CheckoutPage() {
           console.error('Error fetching last shipping address:', err);
         });
     }
-  }, [mounted, loggedIn]);
+  }, [mounted, loggedIn, leave]);
 
   if (!mounted) {
     return (
