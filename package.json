@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "test": "NODE_ENV=test tsx --test --test-concurrency=1 src/__tests__/unit/utils.test.ts src/__tests__/unit/api-helpers.test.ts src/__tests__/unit/server-store.test.ts src/__tests__/integration/auth.test.ts src/__tests__/integration/cart.test.ts src/__tests__/integration/products.test.ts src/__tests__/integration/membership.test.ts src/__tests__/integration/checkout.test.ts src/__tests__/integration/items.test.ts src/__tests__/integration/orders-list.test.ts",
     "test:coverage": "NODE_ENV=test tsx --test --test-concurrency=1 --experimental-test-coverage src/__tests__/unit/utils.test.ts src/__tests__/unit/api-helpers.test.ts src/__tests__/unit/server-store.test.ts src/__tests__/integration/auth.test.ts src/__tests__/integration/cart.test.ts src/__tests__/integration/products.test.ts src/__tests__/integration/membership.test.ts src/__tests__/integration/checkout.test.ts src/__tests__/integration/items.test.ts src/__tests__/integration/orders-list.test.ts",

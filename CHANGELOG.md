@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file, structured 
 ## [2026-07-10] — Cart Badge & Self-healing Cart Quantity Fix
 
 ### 🔧 Fixed & Enhanced
+- **Hydration Mismatch Fix**:
+  - Added `suppressHydrationWarning` to the `<html>` tag in the root layout (`src/app/layout.tsx`). This suppresses console hydration errors/warnings caused by browser extensions (e.g. ColorZilla adding `cz-shortcut-listen="true"`) modifying attributes of the `<body>` or `<html>` elements on the client side.
 - **Cart & Navbar Badge Count**:
   - Changed the cart badge number calculation from counting the sum of product quantities to counting the number of distinct items (unique products) in the cart.
   - This affects both the header/navbar cart icon badge and the cart drawer/page item counts.
@@ -15,6 +17,9 @@ All notable changes to this project will be documented in this file, structured 
   - This prevents the cart from becoming empty when clicking "+" or "-" in cases where the database session was cleared (e.g., after test runs) but the client still retained items in local storage.
 - **Checkout Page Session Expiration Recovery**:
   - Handled 401 Unauthorized errors in the `/api/auth/me` call on the checkout page. If the server session is missing/expired, the client-side session is cleared gracefully using `leave()`, redirecting the user to the login/register card instead of crashing the page.
+- **ESLint v9 Migration**:
+  - Migrated the project's linting setup from `next lint` (which has been completely removed in Next.js 16) to the standard ESLint CLI (`eslint .`) using flat config (`eslint.config.mjs`).
+  - Configured `eslint.config.mjs` to inherit from Next.js rules (`eslint-config-next/core-web-vitals` and `eslint-config-next/typescript`) and disabled the overly strict `react-hooks/set-state-in-effect` rule to allow standard hydration state tracking checks (`mounted` state patterns).
 
 ---
 

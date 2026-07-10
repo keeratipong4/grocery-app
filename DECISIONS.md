@@ -31,3 +31,21 @@
 **เหตุผล (Rationale):**
 - เพื่อรองรับฟีเจอร์ใหม่และปรับตาม Best Practices ล่าสุดของ React 19 / Next.js 16
 - แม้จะมี Breaking Changes ที่ต้องไล่แก้ `await params` ในหลายไฟล์ แต่การอัปเกรดตั้งแต่เนิ่นๆ ในช่วงที่โปรเจกต์ยังมีขนาดเล็กถึงกลาง จะช่วยลด Technical Debt และไม่ต้องปวดหัวกับการ Migration ครั้งใหญ่ในอนาคต
+
+---
+
+## 3. การย้ายจาก `next lint` ไปใช้ ESLint CLI และ Flat Config (`eslint.config.mjs`)
+**วันที่:** 2026-07-10
+
+**บริบทและปัญหา (Context):**
+ใน Next.js 16 คำสั่ง `next lint` ได้ถูกนำออกจากตัว Next.js CLI อย่างถาวร ส่งผลให้การเรียกใช้คำสั่ง `npm run lint` ล้มเหลวเนื่องจากระบบหาคำสั่ง/โฟลเดอร์สำหรับตรวจไม่พบ นอกจากนี้ Next.js 16 แนะนำให้ใช้โครงสร้างการกำหนดค่าแบบ Flat Config ของ ESLint v9 แทนไฟล์คอนฟิกสไตล์เดิม (.eslintrc.json)
+
+**การตัดสินใจ (Decision):**
+1. เปลี่ยนโครงสร้างการ Lint โดยเขียนสคริปต์ `"lint"` ใน `package.json` ให้เรียกใช้ `eslint .` โดยตรงแทน `next lint`
+2. สร้างไฟล์ `eslint.config.mjs` โดยสืบทอดค่าคอนฟิกจาก `eslint-config-next/core-web-vitals` และ `eslint-config-next/typescript`
+3. ปิดการใช้งานกฎ `"react-hooks/set-state-in-effect": "off"` เนื่องจากกฎนี้มีความเข้มงวดสูงเกินไป และขัดขวางการใช้แพทเทิร์น `useState(false) + useEffect(() => setMounted(true), [])` ซึ่งเป็นแพทเทิร์นมาตรฐานในการป้องกันปัญหา Hydration Mismatch ของ Next.js Client Components
+
+**เหตุผล (Rationale):**
+- เพื่อสอดคล้องกับมาตรฐาน Next.js 16 และทำให้ทีมยังคงรันคำสั่ง `npm run lint` ตรวจสอบความถูกต้องของโค้ดก่อน commit งานได้สำเร็จ
+- การปิดกฎ `set-state-in-effect` ช่วยป้องกันไม่ให้เราต้องเปลี่ยนโครงสร้าง Client Components กว่า 8 ไฟล์ในโปรเจกต์ซึ่งใช้งานแพทเทิร์น `mounted` เพื่อรอระบบ Hydration เสร็จสมบูรณ์อย่างปลอดภัย
+
