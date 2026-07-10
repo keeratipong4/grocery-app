@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file, structured 
 
 ---
 
+## [2026-07-10] — Cart Badge & Self-healing Cart Quantity Fix
+
+### 🔧 Fixed & Enhanced
+- **Cart & Navbar Badge Count**:
+  - Changed the cart badge number calculation from counting the sum of product quantities to counting the number of distinct items (unique products) in the cart.
+  - This affects both the header/navbar cart icon badge and the cart drawer/page item counts.
+- **Cart Quantity Update Self-Healing (`PATCH`)**:
+  - Modified the `/api/cart/items/[productId]` route handler to perform a database `upsert` instead of a plain `updateMany`.
+  - This prevents the cart from becoming empty when clicking "+" or "-" in cases where the database session was cleared (e.g., after test runs) but the client still retained items in local storage.
+- **Checkout Page Session Expiration Recovery**:
+  - Handled 401 Unauthorized errors in the `/api/auth/me` call on the checkout page. If the server session is missing/expired, the client-side session is cleared gracefully using `leave()`, redirecting the user to the login/register card instead of crashing the page.
+
+---
+
 ## [2026-07-09] — Next.js 16 Upgrade & Compatibility Fixes
 
 ### 🚀 Upgraded

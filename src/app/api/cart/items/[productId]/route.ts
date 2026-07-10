@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { computeSummary } from '@/lib/server-store';
-import { getToken, getCartItems, getDiscountRateForToken } from '@/lib/api-helpers';
+import { getToken, getCartItems, getDiscountRateForToken, ensureCartSession } from '@/lib/api-helpers';
+import { calcDiscountedPrice } from '@/lib/utils';
 
 interface Props { params: Promise<{ productId: string }> }
 
@@ -24,7 +25,19 @@ export async function PATCH(req: NextRequest, { params }: Props) {
   if (qty < 1) {
     await prisma.cartItem.deleteMany({ where: { sessionToken: token, productId } });
   } else {
-    await prisma.cartItem.updateMany({ where: { sessionToken: token, productId }, data: { qty } });
+    // Self-healing: if the item does not exist in the database (due to session reset or test database wipe),
+    // recreate it using upsert rather than failing silently and clearing the client cart.
+    const product = await prisma.product.findUnique({ where: { id: productId } });
+    if (!product) {
+      return NextResponse.json({ code: 'NOT_FOUND', message: 'ไม่พบสินค้า' }, { status: 404 });
+    }
+    const price = calcDiscountedPrice(product.price, product.discount);
+    await ensureCartSession(token);
+    await prisma.cartItem.upsert({
+      where: { sessionToken_productId: { sessionToken: token, productId } },
+      update: { qty },
+      create: { sessionToken: token, productId, name: product.name, price, qty },
+    });
   }
 
   const items   = await getCartItems(token);
