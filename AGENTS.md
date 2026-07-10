@@ -190,12 +190,16 @@ git merge branch-name --no-verify     # ข้ามขั้นตอน Pre-co
 ## Before Every Commit
 
 1. **Update Documentation:** ALWAYS update `CHANGELOG.md`, `DECISIONS.md`, and/or `PRD.md` as appropriate for your changes BEFORE committing your work.
-2. `npm run build` — zero errors
-3. `npm run lint` — zero warnings
-4. `npm test` — all tests passing; reseed with `npm run db:seed` afterward if you need demo data restored
-5. If a new feature was added, write unit tests for it and run `npm run test:coverage` — must pass with overall coverage above 80%
-6. Open the changed page in browser and verify visually (`npm run dev` — check the terminal for the actual port, 3000 may be in use)
-7. Test at 375px viewport (mobile) if any UI was changed
-8. Confirm `DiscountBadge` only appears when `discount > 0`
-9. Confirm cart badge in Navbar reflects the correct item count
-10. Test every new component at 375px viewport width (mobile).
+2. `npm run type-check` — zero errors
+3. `npm run lint` — zero warnings/errors
+
+## Before Branch Merge or Task Completion (PR Merge / Final Task Report)
+
+1. `npm run build` — zero errors
+2. `npm test` — all tests passing (automatically runs in isolated `test.db` database)
+3. If a new feature was added, write unit tests for it and run `npm run test:coverage` — must pass with overall coverage above 80%
+4. Open the changed page in browser and verify visually (`npm run dev` — check the terminal for the actual port, 3000 may be in use)
+5. Test at 375px viewport (mobile) if any UI was changed
+6. Confirm `DiscountBadge` only appears when `discount > 0`
+7. Confirm cart badge in Navbar reflects the correct item count
+8. Test every new component at 375px viewport width (mobile).
