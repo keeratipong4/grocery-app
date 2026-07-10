@@ -106,6 +106,17 @@ npx prisma generate   # After pulling schema changes without a migration (e.g. f
 
 ## Conventions & Rules
 
+### Git, Branching & Workflow
+- **Branch Strategy:**
+  - `main` branch is production/stable only. NEVER commit or edit directly on `main`.
+  - `develop` branch is integration only. All feature branches are merged here first. NEVER commit or edit directly on `develop`.
+  - All modifications, edits, and new features MUST be done on a separate branch (e.g. `feature/<name>` or `bugfix/<name>`) branched off `develop`.
+- **AI Agent Execution Rule:**
+  - AI Agents must NEVER write files or run commands directly on `main` or `develop`.
+  - When starting a task, the agent MUST check the current branch using git commands.
+  - If the agent is on `main` or `develop`, it MUST create/switch to a new feature branch (e.g., `feature/<name>`) branched from `develop` before writing any files or running commands.
+  - Once changes are complete, the agent can recommend merging the feature branch into `develop`.
+
 ### Language & Code Style
 - TypeScript only — no `any`. Define all types in `src/types/index.ts` and import from there.
 - Default to React Server Components. Add `"use client"` only when interactivity is required, with a short comment explaining why (this convention is consistently followed — check existing components for the pattern).
