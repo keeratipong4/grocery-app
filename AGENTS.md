@@ -122,7 +122,7 @@ git merge branch-name --no-verify     # ข้ามขั้นตอน Pre-co
   - AI Agents must NEVER write files or run commands directly on `main` or `develop`.
   - When starting a task, the agent MUST check the current branch using git commands.
   - If the agent is on `main` or `develop`, it MUST create/switch to a new feature branch (e.g., `feature/<name>`) branched from `develop` before writing any files or running commands.
-  - Once changes are complete, the agent can recommend merging the feature branch into `develop`.
+  - Once changes are complete, the agent can recommend merging the feature branch into `develop` using: `git merge --no-ff branch-name --no-verify`.
 
 ### Language & Code Style
 - TypeScript only — no `any`. Define all types in `src/types/index.ts` and import from there.
