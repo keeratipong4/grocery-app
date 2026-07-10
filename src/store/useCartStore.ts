@@ -102,7 +102,7 @@ export const useCartStore = create<CartStore>()(
         } catch { /* silent */ }
       },
 
-      totalItems: () => get().items.reduce((s, i) => s + i.qty, 0),
+      totalItems: () => get().items.length,
       totalPrice: () => get().items.reduce((s, i) => s + i.price * i.qty, 0),
     }),
     {
