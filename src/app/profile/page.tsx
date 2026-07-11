@@ -22,7 +22,7 @@ interface Order {
 }
 
 export default function ProfilePage() {
-  const { member, join, isMember } = useMemberStore();
+  const { member, join, leave, isMember } = useMemberStore();
 
   const [mounted, setMounted] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -57,6 +57,10 @@ export default function ProfilePage() {
 
     fetch('/api/orders')
       .then(res => {
+        if (res.status === 401) {
+          leave(); // Session expired on server, clear client state
+          throw new Error('Session expired');
+        }
         if (res.ok) return res.json();
         throw new Error('Failed to fetch orders');
       })
@@ -69,7 +73,7 @@ export default function ProfilePage() {
       .finally(() => {
         setOrdersLoading(false);
       });
-  }, [mounted, loggedIn, member?.email]);
+  }, [mounted, loggedIn, member?.email, leave]);
 
   if (!mounted) {
     return (
