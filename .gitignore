@@ -43,3 +43,4 @@ test-results/
 
 # SQLite test database
 /prisma/test.db*
+.env*
