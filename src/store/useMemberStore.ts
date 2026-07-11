@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useCartStore } from './useCartStore';
 import type { Member } from '@/types';
 
 interface MemberStore {
@@ -21,11 +22,15 @@ export const useMemberStore = create<MemberStore>()(
         set({ member: { email, joinedAt: new Date().toISOString() } });
         // Activate membership on server (fire-and-forget)
         fetch('/api/membership/join', { method: 'POST' }).catch(() => {});
+        // Sync cart from Server after login
+        useCartStore.getState().hydrateFromApi();
       },
 
       leave: () => {
         set({ member: null });
         fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+        // Clear cart on logout
+        useCartStore.getState().clearCart();
       },
 
       isMember:     () => get().member !== null,
