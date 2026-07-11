@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { computeSummary } from '@/lib/server-store';
-import { getToken, ensureCartSession, getCartItems, getDiscountRateForToken } from '@/lib/api-helpers';
+import { getToken, ensureCartSession, getCartItems, getDiscountRateForToken, COOKIE_OPTIONS, SESSION_COOKIE_NAME } from '@/lib/api-helpers';
 import { calcDiscountedPrice } from '@/lib/utils';
 import { randomUUID } from 'crypto';
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
   const res = NextResponse.json({ data: summary });
   if (!existingToken) {
-    res.cookies.set('farmart-session', token, { httpOnly: true, sameSite: 'lax', path: '/' });
+    res.cookies.set(SESSION_COOKIE_NAME, token, COOKIE_OPTIONS);
   }
   return res;
 }

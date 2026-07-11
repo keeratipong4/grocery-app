@@ -28,8 +28,17 @@ export function err(code: string, message: string, status: number) {
   return NextResponse.json({ code, message }, { status });
 }
 
+export const SESSION_COOKIE_NAME = 'farmart-session';
+
+export const COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  path: '/',
+  maxAge: 30 * 24 * 60 * 60, // 30 days
+};
+
 export function getToken(req: NextRequest): string | null {
-  return req.cookies.get('farmart-session')?.value ?? null;
+  return req.cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
 }
 
 export async function getAuthSession(req: NextRequest) {

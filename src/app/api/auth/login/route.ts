@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken, verifyPassword } from '@/lib/api-helpers';
+import { getToken, verifyPassword, COOKIE_OPTIONS, SESSION_COOKIE_NAME } from '@/lib/api-helpers';
 import { randomUUID } from 'crypto';
 
 export async function POST(req: NextRequest) {
@@ -42,6 +42,6 @@ export async function POST(req: NextRequest) {
   if (guestToken) await prisma.session.deleteMany({ where: { token: guestToken } });
 
   const res = NextResponse.json({ data: { email: user.email, joinedAt: user.joinedAt.toISOString() } });
-  res.cookies.set('farmart-session', newToken, { httpOnly: true, sameSite: 'lax', path: '/' });
+  res.cookies.set(SESSION_COOKIE_NAME, newToken, COOKIE_OPTIONS);
   return res;
 }
