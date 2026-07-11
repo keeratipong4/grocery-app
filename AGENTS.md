@@ -86,7 +86,7 @@ git commit -m "ข้อความ" --no-verify  # ข้ามขั้นต
 git merge branch-name --no-verify     # ข้ามขั้นตอน Pre-commit Hook เมื่อมีการสร้าง Merge Commit
 ```
 
-> Always run `npm run build`, `npm run lint`, and `npm test` before reporting a task complete. All must pass with zero errors. Since tests run on `prisma/test.db`, running tests will not affect your development database (`prisma/dev.db`) data.
+> Run type checks (`npm run type-check`) and linting (`npm run lint`) before committing code. Heavy verification commands (`npm run build` and `npm test`) are only required when preparing to merge into the `main` branch or deploying, and are not required when committing/merging to `develop`. Pure documentation changes (e.g., editing `.md` files) bypass all build/test/lint/type-check steps entirely.
 
 ---
 
@@ -190,16 +190,22 @@ git merge branch-name --no-verify     # ข้ามขั้นตอน Pre-co
 ## Before Every Commit
 
 1. **Update Documentation:** ALWAYS update `CHANGELOG.md`, `DECISIONS.md`, and/or `PRD.md` as appropriate for your changes BEFORE committing your work.
-2. `npm run type-check` — zero errors
-3. `npm run lint` — zero warnings/errors
+2. **Bypass Check**: If the changes are purely documentation-only (e.g., modifying markdown files like `.md`, `CHANGELOG`, or `PRD` without touching any `.ts`, `.tsx`, `.js`, or configuration files), you may **bypass** all testing, linting, build, and type-checking steps.
+3. For non-documentation commits:
+   - `npm run type-check` — zero errors
+   - `npm run lint` — zero warnings/errors
 
 ## Before Branch Merge or Task Completion (PR Merge / Final Task Report)
 
-1. `npm run build` — zero errors
-2. `npm test` — all tests passing (automatically runs in isolated `test.db` database)
-3. If a new feature was added, write unit tests for it and run `npm run test:coverage` — must pass with overall coverage above 80%
-4. Open the changed page in browser and verify visually (`npm run dev` — check the terminal for the actual port, 3000 may be in use)
-5. Test at 375px viewport (mobile) if any UI was changed
-6. Confirm `DiscountBadge` only appears when `discount > 0`
-7. Confirm cart badge in Navbar reflects the correct item count
-8. Test every new component at 375px viewport width (mobile).
+1. **Bypass Check**: If the changes are purely documentation-only, no verification commands or tests are required.
+2. **Merging to `develop` Branch**:
+   - Running full builds and test suites is NOT required when committing to or merging into `develop`.
+3. **Merging to `main` Branch / Deploying**:
+   - `npm run build` — zero errors
+   - `npm test` — all tests passing (automatically runs in isolated `test.db` database)
+   - If a new feature was added, write unit tests for it and run `npm run test:coverage` — must pass with overall coverage above 80%
+   - Open the changed page in browser and verify visually (`npm run dev` — check the terminal for the actual port, 3000 may be in use)
+   - Test at 375px viewport (mobile) if any UI was changed
+   - Confirm `DiscountBadge` only appears when `discount > 0`
+   - Confirm cart badge in Navbar reflects the correct item count
+   - Test every new component at 375px viewport width (mobile).
