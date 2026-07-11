@@ -23,6 +23,9 @@ All notable changes to this project will be documented in this file, structured 
 ### 📝 Documentation
 - **Multi-language Support Roadmap**:
   - Added Multi-language Support to the Future Roadmap & Backlog section in `PRD.md` to support Thai and English languages for international users in the future.
+- **Improved Agent Verification Workflow**:
+  - Updated the AI Agent rules in `AGENTS.md` to bypass all verification steps (linting, type-checking, testing, building) for purely documentation-only changes.
+  - Restricted heavy test/build verifications to main branch merges or deployments (excluding develop branch merges) to streamline development.
 
 ---
 
