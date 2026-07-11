@@ -1,10 +1,24 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 import path from 'path'
-
 import fs from 'fs'
 
 function createPrismaClient() {
+  const dbUrl = process.env.DATABASE_URL || ''
+  const isPostgres = dbUrl.startsWith('postgres://') || dbUrl.startsWith('postgresql://')
+
+  if (isPostgres) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Pool } = require('pg')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { PrismaPg } = require('@prisma/adapter-pg')
+    
+    const pool = new Pool({ connectionString: dbUrl })
+    const adapter = new PrismaPg(pool)
+    return new PrismaClient({ adapter })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3')
   const isTest  = process.env.NODE_ENV === 'test'
   const dbFile  = isTest ? 'test.db' : 'dev.db'
   const dbPath  = path.resolve(process.cwd(), 'prisma', dbFile)

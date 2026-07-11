@@ -46,6 +46,7 @@
 - [ ] **Order Status Tracking:** ให้ลูกค้าติดตามสถานะการจัดส่ง (Preparing -> Shipped -> Delivered)
 - [ ] **Reviews & Ratings:** เปิดให้ลูกค้าที่ซื้อสินค้าไปแล้วสามารถเขียนรีวิวและให้คะแนนสินค้าได้
 - [ ] **Coupon System:** ระบบคูปองส่วนลดแบบกรอกโค้ดเพิ่มเติมจากส่วนลด Member
+- [ ] **Multi-language Support:** รองรับการใช้งานหลายภาษา (เช่น ภาษาไทย และ ภาษาอังกฤษ) เพื่อเพิ่มความสะดวกแก่ผู้ใช้งานต่างชาติ
 
 ## 5. Technical Requirements
 - **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS

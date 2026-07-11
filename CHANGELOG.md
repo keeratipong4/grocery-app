@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file, structured 
 
 ---
 
+## [2026-07-11] — Vercel Deployment Support & Body Hydration Mismatch Fix
+
+### 🚀 Added (Deployment)
+- **Vercel Deploy Build Script**:
+  - Created `scripts/prepare-prod-db.js` which dynamically rewrites `prisma/schema.prisma` at build-time to change the datasource provider from `"sqlite"` to `"postgresql"`. This enables serverless PostgreSQL deployment without manual schema maintenance.
+- **PostgreSQL Driver Adapter**:
+  - Added dependencies `@prisma/adapter-pg` and `pg` to connect to PostgreSQL databases in production.
+  - Configured `"build:vercel"` script in `package.json` to execute the database preparation and client generation.
+  - Configured `"postinstall"` script to automatically generate the Prisma Client after installation.
+
+### 🔧 Fixed & Enhanced
+- **Environment-Aware Prisma Client**:
+  - Updated `src/lib/prisma.ts` to automatically detect if the database URL is PostgreSQL/Postgres. If so, it loads the PostgreSQL adapter, avoiding Native compilation crashes on Vercel's serverless nodes. It seamlessly falls back to SQLite for local development and testing.
+- **Body Hydration Mismatch**:
+  - Added `suppressHydrationWarning` to the `<body>` element in `src/app/layout.tsx`. This prevents React from throwing hydration errors when browser extensions (like ColorZilla or Chrome developer tools) inject custom listener attributes like `cz-shortcut-listen="true"` onto the `<body>` element on startup.
+
+### 📝 Documentation
+- **Multi-language Support Roadmap**:
+  - Added Multi-language Support to the Future Roadmap & Backlog section in `PRD.md` to support Thai and English languages for international users in the future.
+
+---
+
 ## [2026-07-10] — Cart Badge, Self-healing Cart Quantity, and Navbar Navigation Fixes
 
 ### 🔧 Fixed & Enhanced
