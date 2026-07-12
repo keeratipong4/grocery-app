@@ -49,3 +49,24 @@
 - เพื่อสอดคล้องกับมาตรฐาน Next.js 16 และทำให้ทีมยังคงรันคำสั่ง `npm run lint` ตรวจสอบความถูกต้องของโค้ดก่อน commit งานได้สำเร็จ
 - การปิดกฎ `set-state-in-effect` ช่วยป้องกันไม่ให้เราต้องเปลี่ยนโครงสร้าง Client Components กว่า 8 ไฟล์ในโปรเจกต์ซึ่งใช้งานแพทเทิร์น `mounted` เพื่อรอระบบ Hydration เสร็จสมบูรณ์อย่างปลอดภัย
 
+---
+
+## 4. การสลับประเภทฐานข้อมูลอัตโนมัติสำหรับการ Deploy ขึ้น Vercel (Compile-time Database Provider Swapping)
+**วันที่:** 2026-07-12
+
+**บริบทและปัญหา (Context):**
+ในเครื่องโลคัล เราเลือกใช้ SQLite (`better-sqlite3`) เป็นฐานข้อมูลหลักสำหรับการพัฒนาและการรันเทส (Unit & Integration tests) เนื่องจากใช้งานสะดวก รวดเร็ว และไม่ต้องต่อเครือข่ายอินเทอร์เน็ต แต่เมื่อต้องการ Deploy เว็บไซต์ขึ้นคลาวด์ Vercel ซึ่งทำงานในรูปแบบ Serverless (Stateless & Ephemeral) เราไม่สามารถใช้ SQLite ในเครื่องได้ จำเป็นต้องใช้ฐานข้อมูลประเภทอื่นที่มีคลาวด์จัดเก็บถาวร เช่น PostgreSQL (Neon)
+
+แต่ระบบของ Prisma ORM ไม่อนุญาตให้ใช้ฐานข้อมูลต่างประเภทกับที่ตั้งค่าไว้ในไฟล์ `prisma/schema.prisma` (เช่น หากระบุเป็น `provider = "sqlite"` จะไม่สามารถป้อนการเชื่อมต่อเป็น PostgreSQL ได้) การสลับข้อมูลด้วยมือไปมาสร้างความลำบากและอาจก่อความเสียหายกับประวัติ Git ได้ง่าย
+
+**การตัดสินใจ (Decision):**
+เราตัดสินใจใช้ระบบ **Dual-Database** โดยการสลับการตั้งค่าแบบอัตโนมัติในกระบวนการทำงาน (Compile-time & Run-time):
+1. **ในส่วน Compile-time (ช่วงบิลด์):** เขียนสคริปต์ [prepare-prod-db.js](file:///Users/keeratipong/Desktop/Udemy/mikelopster/grocery-app/scripts/prepare-prod-db.js) และตั้งค่า [vercel.json](file:///Users/keeratipong/Desktop/Udemy/mikelopster/grocery-app/vercel.json) ให้ Vercel สั่งแปลงค่า `provider = "sqlite"` เป็น `provider = "postgresql"` ในไฟล์ `schema.prisma` แบบอัตโนมัติก่อนรันบิลด์
+2. **ในส่วน Run-time (ช่วงรันจริง):** ปรับจูน [prisma.ts](file:///Users/keeratipong/Desktop/Udemy/mikelopster/grocery-app/src/lib/prisma.ts) เพื่อตรวจหาโปรโตคอลของ `DATABASE_URL` หากพบว่าขึ้นต้นด้วย `postgres` จะสั่งดึง Driver `pg` และ `@prisma/adapter-pg` มาใช้งานเชื่อมต่อ Neon PostgreSQL แทนการเชื่อม SQLite
+
+**เหตุผล (Rationale):**
+- **รักษาความคล่องตัวโลคัล:** ช่วยรักษาความเร็วในการพัฒนาและรันชุดทดสอบ Integration Test ทั้งหมด 149 รายการบน SQLite ในเครื่องนักพัฒนาได้สมบูรณ์แบบโดยไม่ต้องเปลี่ยนสแต็ก
+- **ประสิทธิภาพของ Vercel:** ป้องกันไม่ให้แอปพลิเคชันค้างจากการโหลดโมดูลแบบ Native (`better-sqlite3`) ซึ่งมักบีบอัดและทำงานไม่ได้บนระบบ Serverless ของ Vercel
+- **สะดวกสบายและไร้รอยต่อ:** นักพัฒนาเพียงแค่ Push โค้ดขึ้น GitHub ระบบอัตโนมัติของ Vercel จะดึงไปเตรียมความพร้อมและปรับเป็นระบบ PostgreSQL ให้อัตโนมัติในระบบคลาวด์ทันที
+
+
