@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file, structured by date and session.
 
+## [2026-07-13] — README & Portfolio Showcase Enhancement for Recruiters
+
+### 📝 Documentation
+- **Showcase-focused README Update**:
+  - Rewrote `README.md` to serve as a high-quality portfolio showcase for recruiters and hiring managers.
+  - Highlighted full product features, architectural choices, and tech stack details (Next.js 16, React 19, Tailwind, Prisma).
+  - Explicitly detailed **Human-AI Agentic Co-Development workflows** (using Google DeepMind's Antigravity and rules outlined in `AGENTS.md`).
+  - Showcased dual-database mechanism (SQLite locally vs. PostgreSQL on Vercel) and 140+ test suites.
+
 ---
 
 ## [2026-07-11] — Vercel Deployment Support & Body Hydration Mismatch Fix
