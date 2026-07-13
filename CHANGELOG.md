@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file, structured 
   - Highlighted full product features, architectural choices, and tech stack details (Next.js 16, React 19, Tailwind, Prisma).
   - Explicitly detailed **Human-AI Agentic Co-Development workflows** (using Google DeepMind's Antigravity and rules outlined in `AGENTS.md`).
   - Showcased dual-database mechanism (SQLite locally vs. PostgreSQL on Vercel) and 140+ test suites.
+  - Corrected the Vercel Live Demo link to point to the actual deployment URL (`https://grocery-app-three-drab.vercel.app`).
 
 ---
 
