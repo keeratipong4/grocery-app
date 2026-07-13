@@ -15,7 +15,7 @@ The application allows users to search, filter, and buy groceries (vegetables, f
 ---
 
 ## 🚀 Live Demo & Deployment
-- **Live Application:** [Farmart on Vercel](https://grocery-app-seven-phi.vercel.app/)
+- **Live Application:** [Farmart on Vercel](https://grocery-app-three-drab.vercel.app/)
 - **Database:** Serverless cloud PostgreSQL hosted on Neon DB.
 
 ---
